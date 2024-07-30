@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet">
+    <title>Login</title>
+  </head>
+  <body>
+    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+      <div class="row justify-content-center w-100">
+        <div class="col-md-8 col-lg-6">
+          <div class="card shadow-lg border-primary rounded-lg">
+            <div class="card-body">
+              <h2 class="card-title text-center mb-4">Login</h2>
+              <form method="POST" action="/login">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flash messages for success and error -->
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} fade" role="alert" id="flash-message">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+  </body>
+</html>

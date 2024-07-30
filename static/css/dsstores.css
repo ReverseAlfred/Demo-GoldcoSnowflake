@@ -1,0 +1,23 @@
+/* dsstores.css */
+.content-list-container {
+  max-height: calc(100vh - 120px); /* Adjust based on header and padding */
+  overflow-y: auto;
+  padding-right: 15px; /* Adds padding to prevent content from touching the scrollbar */
+}
+
+.content-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content-list .item {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  margin-bottom: -1px; /* Adjusts to prevent double border at the bottom */
+}
+
+.content-list .item:last-child {
+  border-bottom: none; /* Removes border from the last item */
+}
