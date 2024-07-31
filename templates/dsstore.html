@@ -1,0 +1,43 @@
+<!-- dsstore.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsstore.css') }}">
+    <script src="{{ url_for('static', filename='js/dsstore.js') }}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <h1>Dashboard CKB</h1>
+    </header>
+    <div class="container">
+        <nav class="sidebar">
+            <button id="productsButton">Products</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="positionsButton">Positions</button>
+            <button id="performanceButton">Performance</button>
+        </nav>
+        <main class="main-content">
+            <h2>Stores</h2>
+            <div class="filter-bar">
+                <input type="text" id="filterInput" placeholder="Filter stores...">
+                <button id="addItemButton">Add Item</button>
+            </div>
+            <div id="itemsContainer">
+                {% for store in stores %}
+                <div class="item">
+                    <span>Store {{ store[0] }}: {{ store[1] }}</span>
+                    <button class="edit-button">Edit</button>
+                    <button class="delete-button">Delete</button>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+        <div id="floatingMessage" class="floating-message"></div>
+    </div>
+</body>
+</html>

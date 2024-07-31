@@ -1,5 +1,5 @@
 /* Reset default margins and paddings */
-body, h1, p, button {
+body, h1, h2, p, button {
     margin: 0;
     padding: 0;
 }
@@ -11,7 +11,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
+    overflow: hidden; /* Prevent overall body scrolling */
 }
 
 .header {
@@ -28,10 +28,8 @@ body {
 
 .container {
     display: flex;
-    flex-direction: row;
     margin-top: 4rem; /* Space for fixed header */
-    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
-    box-sizing: border-box; /* Ensure padding is included in the container's height */
+    height: calc(100vh - 4rem);
 }
 
 .sidebar {
@@ -40,12 +38,10 @@ body {
     padding: 1rem;
     border-right: 1px solid #ddd;
     position: fixed;
-    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
+    height: calc(100vh - 4rem);
     top: 4rem;
     left: 0;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box; /* Include padding in width */
-    overflow: hidden; /* Prevent scrollbar inside sidebar */
 }
 
 .sidebar button {
@@ -69,25 +65,94 @@ body {
 }
 
 .main-content {
-    margin-left: 200px; /* Space for sidebar */
+    margin-left: 240px; /* Increased space for sidebar */
     padding: 1rem;
     flex: 1;
     background: #fff;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-    box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
-    overflow: hidden; /* Prevent scrollbars if content size is slightly off */
+    overflow-y: auto; /* Allow vertical scroll if needed */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.filter-bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.filter-bar input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+}
+
+.filter-bar button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-bar button:hover {
+    background-color: #0056b3;
+}
+
+#itemsContainer {
+    margin-top: 1rem;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.item span {
+    flex: 1;
+}
+
+.item button {
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-right: 0.5rem; /* Space between buttons */
+}
+
+.edit-button {
+    background-color: #28a745; /* Green */
+}
+
+.edit-button:hover {
+    background-color: #218838;
+}
+
+.delete-button {
+    background-color: #dc3545; /* Red */
+}
+
+.delete-button:hover {
+    background-color: #c82333;
 }
 
 .floating-message {
-    position: fixed; /* Keep it visible on the screen */
-    bottom: 1rem; /* Ensure it is always visible at the bottom */
+    position: absolute;
+    bottom: -50px; /* Hide initially below the container */
     left: 50%;
     transform: translateX(-50%);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     color: #fff;
     font-size: 0.875rem;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s, bottom 0.3s;
     opacity: 0;
     z-index: 1;
 }
@@ -101,6 +166,7 @@ body {
 }
 
 .floating-message.show {
+    bottom: 1rem; /* Move into view */
     opacity: 1;
 }
 
@@ -113,13 +179,12 @@ body {
         border-right: none;
     }
 
-    .main-content {
-        margin-left: 0; /* Remove sidebar space */
-        padding: 1rem;
+    .sidebar button {
+        margin-bottom: 0.5rem;
     }
 
-    /* Additional styles for smaller screens */
-    .header {
-        padding: 0.5rem; /* Adjust header padding */
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
     }
 }
