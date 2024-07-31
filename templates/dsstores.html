@@ -21,21 +21,26 @@
     {% endif %}
 
     <h2>Stores</h2>
-    <div class="d-flex mb-3">
-        <input type="text" id="store-filter" class="form-control mr-2" placeholder="Filter stores...">
-        <button id="add-store-btn" class="btn btn-primary">Add New Store</button>
-    </div>
-    <div class="content-list-container">
+    <form method="get" action="{{ url_for('stores.show_stores') }}" class="d-flex mb-3">
+        <input type="text" id="store-filter" name="filter" class="form-control mr-2" placeholder="Filter stores..." value="{{ filter }}">
+        <button type="button" id="filter-btn" class="btn btn-primary">Filter</button>
+        <button id="add-store-btn" class="btn btn-primary ml-2">Add New Store</button>
+    </form>
+    <div class="content-list-container" id="content">
         <ul class="content-list">
             {% for store in stores %}
-                <li class="item d-flex justify-content-between align-items-center">
-                    {{ store }}
-                    <div class="btn-group">
+                <li class="item d-flex justify-content-start align-items-center">
+                    <div class="btn-group mr-3">
                         <button class="btn btn-warning btn-sm edit-btn" data-store="{{ store }}">Edit</button>
                         <button class="btn btn-danger btn-sm delete-btn" data-store="{{ store }}">Delete</button>
                     </div>
+                    <span class="store-name">{{ store }}</span>
                 </li>
             {% endfor %}
         </ul>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/dsstores.js') }}"></script>
 {% endblock %}

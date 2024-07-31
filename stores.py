@@ -17,13 +17,18 @@ def get_snowflake_connection():
     )
     return conn
 
-def get_stores():
+def get_stores(filter_value=None):
     try:
         conn = get_snowflake_connection()
         cursor = conn.cursor()
         
-        # Query to retrieve store names
-        cursor.execute("SELECT storename FROM stores")
+        # Query to retrieve store names with optional filtering
+        query = "SELECT storename FROM stores"
+        if filter_value:
+            query += " WHERE LOWER(storename) LIKE %s"
+            filter_value = f"%{filter_value.lower()}%"
+        
+        cursor.execute(query, (filter_value,) if filter_value else None)
         stores = [row[0] for row in cursor.fetchall()]
         
         return stores
@@ -35,11 +40,12 @@ def get_stores():
     finally:
         conn.close()
 
-@stores_bp.route('/dsstores')
+@stores_bp.route('/dsstores', methods=['GET', 'POST'])
 def show_stores():
+    filter_value = request.args.get('filter', '')
     try:
-        stores = get_stores()
-        return render_template('dsstores.html', stores=stores)
+        stores = get_stores(filter_value)
+        return render_template('dsstores.html', stores=stores, filter=filter_value)
     except Exception as e:
         print(f"Error: {e}")
         return render_template('dsstores.html', error_message='Error retrieving data from Snowflake.')

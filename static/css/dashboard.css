@@ -1,88 +1,144 @@
-/* Reset some default styling */
-body, html {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* General Styles for Dashboard and Store */
+
+body {
+    font-family: Arial, sans-serif;
 }
 
-/* Header styling */
-.header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+header {
     background-color: #007bff;
     color: #fff;
-    padding: 15px;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
 }
 
-/* Sidebar styling */
-.sidebar {
-    position: fixed;
-    top: 60px; /* Height of the header */
-    left: 0;
-    width: 250px;
-    height: calc(100vh - 60px); /* Full height minus the header */
-    background-color: #343a40;
-    color: #fff;
-    padding: 20px;
-    overflow-y: auto;
-    border-right: 2px solid #495057;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+h1 {
+    margin: 0;
 }
 
-.sidebar-title {
-    font-size: 1.5rem;
-    color: #f8f9fa;
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid #495057;
-    padding-bottom: 10px;
+#sidebar {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+    padding-bottom: 1rem;
 }
 
-.nav-item {
-    margin-bottom: 10px;
+#sidebar h4 {
+    color: #007bff;
 }
 
-.nav-link {
-    color: #adb5bd;
-    text-decoration: none;
-    display: block;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    background-color: #495057;
-    color: #f8f9fa;
-}
-
-.nav-link.active {
-    font-weight: bold;
-}
-
-/* Content styling */
-.content {
-    margin-top: 60px; /* Height of the header */
-    margin-left: 250px; /* Width of the sidebar */
-    padding: 20px;
+#content {
+    background-color: #fff;
+    padding: 1rem;
     flex: 1;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-        border-right: none;
-        box-shadow: none;
-        margin-bottom: 20px;
-    }
+.nav-link {
+    color: #007bff;
+    font-size: 1.1rem;
+    padding: 10px;
+}
 
-    .content {
-        margin-left: 0;
-    }
+.nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.content-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.content-list .item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+/* Hover effect for items */
+.content-list .item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Space for buttons on the left and margin for the store-name */
+.content-list .item {
+    padding-left: 60px; /* Space for buttons on the left */
+    position: relative;
+    padding-right: 10px; /* Ensure some space on the right */
+}
+
+/* Position buttons inside the item */
+.content-list .item .btn-group {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Margin for store name text */
+.content-list .item .store-name {
+    margin-left: 70px; /* Adjust based on button width */
+}
+
+/* Hidden class to handle visibility with JavaScript */
+.hidden {
+    display: none;
+}
+
+/* Alerts */
+.alert {
+    margin-top: 20px;
+}
+
+#store-filter {
+    flex: 1;
+}
+
+/* Modern UI Elements */
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-item a {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-item a:hover {
+    text-decoration: underline;
 }
