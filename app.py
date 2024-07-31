@@ -1,16 +1,18 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, render_template
 from auth import auth_bp
-from dashboard import dashboard_bp
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Change to a secure key
 
+# Register blueprints
 app.register_blueprint(auth_bp)
-app.register_blueprint(dashboard_bp)
 
 @app.route('/')
 def index():
-    return redirect(url_for('auth.login'))
+    return render_template('login.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

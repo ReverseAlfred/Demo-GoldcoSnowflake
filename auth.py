@@ -1,5 +1,6 @@
 from flask import Blueprint, request, redirect, url_for, make_response, render_template
 import snowflake.connector
+from config import Config  # Import the Config class
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -13,19 +14,19 @@ def login():
             return "Username and password are required.", 400
 
         try:
-            # Replace with your Snowflake connection details
+            # Use the configuration from config.py
             conn = snowflake.connector.connect(
                 user=username,
                 password=password,
-                account='your_account',  # Replace with your Snowflake account
-                warehouse='ckb_wh',
-                database='ckb',
-                schema='public'
+                account=Config.SNOWFLAKE_ACCOUNT,  # Use config values
+                warehouse=Config.SNOWFLAKE_WAREHOUSE,
+                database=Config.SNOWFLAKE_DATABASE,
+                schema=Config.SNOWFLAKE_SCHEMA
             )
             conn.close()
 
             # Set cookies with login data
-            resp = make_response(redirect(url_for('dashboard.dashboard')))
+            resp = make_response(redirect(url_for('dashboard')))
             resp.set_cookie('snowflake_username', username)
             resp.set_cookie('snowflake_password', password)
 

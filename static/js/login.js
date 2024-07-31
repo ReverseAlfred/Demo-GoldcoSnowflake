@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard'; // Use /dashboard here
                 }, 1500); // Adjust delay as needed
             } else {
                 // Read and display the response text
