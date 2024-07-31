@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard CKB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</head>
+<body>
+    <header class="header">
+        <h1>Dashboard CKB</h1>
+    </header>
+    <div class="container">
+        <nav class="sidebar">
+            <button id="productsButton">Products</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="positionsButton">Positions</button>
+            <button id="performanceButton">Performance</button>
+        </nav>
+        <main class="main-content">
+            <p>Welcome to the Dashboard. Use the menu to navigate through different sections.</p>
+        </main>
+        <div id="floatingMessage" class="floating-message"></div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+from flask import Blueprint, request, redirect, url_for, make_response, render_template
+import snowflake.connector
+
+auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if not username or not password:
+            return "Username and password are required.", 400
+
+        try:
+            # Replace with your Snowflake connection details
+            conn = snowflake.connector.connect(
+                user=username,
+                password=password,
+                account='your_account',  # Replace with your Snowflake account
+                warehouse='ckb_wh',
+                database='ckb',
+                schema='public'
+            )
+            conn.close()
+
+            # Set cookies with login data
+            resp = make_response(redirect(url_for('dashboard.dashboard')))
+            resp.set_cookie('snowflake_username', username)
+            resp.set_cookie('snowflake_password', password)
+
+            return "Login successful!", 200
+
+        except snowflake.connector.errors.DatabaseError:
+            return "Login failed. Please check your credentials and try again.", 400
+
+    return render_template('login.html')
