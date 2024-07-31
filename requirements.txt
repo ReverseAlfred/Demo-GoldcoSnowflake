@@ -1,3 +1,0 @@
-Flask
-snowflake-connector-python
-python-dotenv
