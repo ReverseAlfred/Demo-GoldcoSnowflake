@@ -1,16 +1,15 @@
-<!-- dsstore.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stores</title>
+    <title>Store Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dsstore.css') }}">
     <script src="{{ url_for('static', filename='js/dsstore.js') }}" defer></script>
 </head>
 <body>
     <header class="header">
-        <h1>Dashboard CKB</h1>
+        <h1>Store Dashboard</h1>
     </header>
     <div class="container">
         <nav class="sidebar">
@@ -30,7 +29,8 @@
             <div id="itemsContainer">
                 {% for store in stores %}
                 <div class="item">
-                    <span>Store {{ store[0] }}: {{ store[1] }}</span>
+                    <span>Store ID: {{ store[0] }}</span>
+                    <span>Store Name: {{ store[1] }}</span>
                     <button class="edit-button">Edit</button>
                     <button class="delete-button">Delete</button>
                 </div>
