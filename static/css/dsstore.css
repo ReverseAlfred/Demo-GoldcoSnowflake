@@ -1,5 +1,5 @@
 /* Reset default margins and paddings */
-body, h1, h2, p, button {
+body, h1, p, button {
     margin: 0;
     padding: 0;
 }
@@ -11,7 +11,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden; /* Prevent overall body scrolling */
+    box-sizing: border-box;
 }
 
 .header {
@@ -29,7 +29,8 @@ body {
 .container {
     display: flex;
     margin-top: 4rem; /* Space for fixed header */
-    height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
+    box-sizing: border-box;
 }
 
 .sidebar {
@@ -42,6 +43,8 @@ body {
     top: 4rem;
     left: 0;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .sidebar button {
@@ -65,19 +68,27 @@ body {
 }
 
 .main-content {
-    margin-left: 240px; /* Increased space for sidebar */
+    margin-left: 200px; /* Space for sidebar */
     padding: 1rem;
     flex: 1;
     background: #fff;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto; /* Allow vertical scroll if needed */
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
+#itemsContainer {
+    width: 100%; /* Make itemsContainer fit the full width of main-content */
+    box-sizing: border-box;
+}
+
+/* Filter bar styling */
 .filter-bar {
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .filter-bar input {
@@ -102,72 +113,198 @@ body {
     background-color: #0056b3;
 }
 
-#itemsContainer {
-    margin-top: 1rem;
-}
-
-.item {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem;
-    border-bottom: 1px solid #ddd;
-}
-
-.item span {
-    flex: 1;
-}
-
-.item button {
-    padding: 0.3rem 0.6rem;
+/* Style for buttons similar to addButton */
+button.custom-style {
+    padding: 0.8rem 1.5rem; /* Larger padding for prominent buttons */
     border: none;
     border-radius: 4px;
-    color: #fff;
+    font-size: 1rem; /* Larger font size */
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin-right: 0.5rem; /* Space between buttons */
+    transition: background-color 0.3s, color 0.3s;
+    color: #fff;
+    min-width: 100px; /* Minimum width for consistency */
+    text-align: center; /* Center text in button */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for better visibility */
 }
 
-.edit-button {
-    background-color: #28a745; /* Green */
+/* Buttons like addButton */
+#addButton.custom-style {
+    background-color: #007bff;
 }
 
-.edit-button:hover {
-    background-color: #218838;
+#addButton.custom-style:hover {
+    background-color: #0056b3;
 }
 
-.delete-button {
-    background-color: #dc3545; /* Red */
+/* Edit button styling */
+.edit-button.custom-style {
+    background-color: #15bd23;
 }
 
-.delete-button:hover {
+.edit-button.custom-style:hover {
+    background-color: #0056b3;
+}
+
+/* Delete button styling */
+.delete-button.custom-style {
+    background-color: #dc3545;
+}
+
+.delete-button.custom-style:hover {
     background-color: #c82333;
 }
 
 .floating-message {
-    position: absolute;
-    bottom: -50px; /* Hide initially below the container */
+    position: fixed;
+    bottom: 1rem;
     left: 50%;
     transform: translateX(-50%);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     color: #fff;
     font-size: 0.875rem;
-    transition: opacity 0.3s, bottom 0.3s;
+    transition: opacity 0.3s;
     opacity: 0;
-    z-index: 1;
+    z-index: 1000; /* Ensure floating messages appear above other elements */
 }
 
 .floating-message.success {
-    background-color: #28a745; /* Green */
+    background-color: #28a745;
 }
 
 .floating-message.error {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
 }
 
 .floating-message.show {
-    bottom: 1rem; /* Move into view */
     opacity: 1;
+}
+
+/* Floating form for adding and editing */
+#floatingFormContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 500; /* Ensure forms are below floating messages */
+}
+
+.floating-form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.floating-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.floating-form input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.floating-form button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.floating-form button[type="submit"] {
+    background-color: #007bff;
+}
+
+.floating-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.floating-form button[type="button"] {
+    background-color: #dc3545;
+}
+
+.floating-form button[type="button"]:hover {
+    background-color: #c82333;
+}
+
+/* Delete confirmation dialog */
+.delete-confirmation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 500; /* Ensure confirmation dialog is below floating messages */
+    text-align: center;
+    padding: 2rem;
+}
+
+.delete-confirmation p {
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.delete-confirmation button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0 0.5rem;
+}
+
+.delete-confirmation #confirmDelete {
+    background-color: #dc3545;
+}
+
+.delete-confirmation #confirmDelete:hover {
+    background-color: #c82333;
+}
+
+.delete-confirmation #cancelDelete {
+    background-color: #007bff;
+}
+
+.delete-confirmation #cancelDelete:hover {
+    background-color: #0056b3;
+}
+
+/* Center content within table cells relative to the header */
+.table-container {
+    width: 100%;
+    margin: 0;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container th, .table-container td {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
 }
 
 /* Responsive Design */
@@ -179,12 +316,41 @@ body {
         border-right: none;
     }
 
-    .sidebar button {
-        margin-bottom: 0.5rem;
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .header {
+        padding: 0.5rem;
+    }
+
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
     }
 
     .main-content {
         margin-left: 0;
         padding: 1rem;
+    }
+
+    .filter-bar {
+        flex-direction: column;
+    }
+
+    .filter-bar input {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+
+    .filter-bar button {
+        width: 100%;
     }
 }
