@@ -13,35 +13,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData,
             });
 
+            const text = await response.text();
+
             if (response.ok) {
                 // Show success message and redirect to dashboard
-                messageElement.textContent = 'Login successful!';
-                messageElement.className = 'floating-message success show';
+                showMessage('success', 'Login successful!');
 
                 // Redirect after a short delay
                 setTimeout(() => {
                     window.location.href = '/dashboard'; // Use /dashboard here
                 }, 1500); // Adjust delay as needed
             } else {
-                // Read and display the response text
-                const text = await response.text();
-                messageElement.textContent = text;
-                messageElement.className = 'floating-message error show';
-
-                // Hide message after a few seconds
-                setTimeout(() => {
-                    messageElement.className = 'floating-message error hide';
-                }, 3000); // Adjust delay as needed
+                // Show error message based on response text
+                showMessage('error', text);
             }
         } catch (error) {
             // Handle network or other errors
-            messageElement.textContent = 'An unexpected error occurred. Please try again.';
-            messageElement.className = 'floating-message error show';
-
-            // Hide message after a few seconds
-            setTimeout(() => {
-                messageElement.className = 'floating-message error hide';
-            }, 3000); // Adjust delay as needed
+            showMessage('error', 'An unexpected error occurred. Please try again.');
         }
     });
+
+    // Show message function to handle the display of messages
+    function showMessage(type, message) {
+        messageElement.textContent = message;
+        messageElement.className = `floating-message ${type} show`;
+
+        setTimeout(() => {
+            messageElement.classList.remove('show');
+            messageElement.classList.add('hide');
+        }, 3000); // Adjust delay as needed
+    }
 });

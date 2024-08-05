@@ -64,6 +64,7 @@ button:hover {
     background-color: #0056b3;
 }
 
+/* Floating message styling */
 .floating-message {
     display: none; /* Hidden by default */
     position: fixed;
@@ -75,7 +76,7 @@ button:hover {
     font-size: 16px;
     color: #fff;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Adjust transition duration */
 }
 
 .floating-message.show {

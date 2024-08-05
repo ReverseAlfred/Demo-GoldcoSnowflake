@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('.sidebar button');
+    const sidebar = document.querySelector('.sidebar');
     const messageElement = document.getElementById('floatingMessage');
 
-    buttons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            const buttonText = event.target.textContent;
+    sidebar.addEventListener('click', (event) => {
+        // Check if the clicked element is a button
+        if (event.target.tagName === 'BUTTON') {
+            const buttonText = event.target.textContent.trim();
             messageElement.textContent = `${buttonText} clicked!`;
-            messageElement.className = 'floating-message success show'; // Show success message for now
+            messageElement.className = 'floating-message success show'; // Show success message
 
             setTimeout(() => {
                 messageElement.classList.remove('show');
@@ -14,27 +15,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Redirect based on button text
             switch (buttonText) {
+                case 'Dashboard':
+                    window.location.href = '/dashboard';
+                    break;
+                case 'Cluster':
+                    window.location.href = '/dscluster';
+                    break;
                 case 'Stores':
                     window.location.href = '/dsstore';
                     break;
                 case 'Products':
-                    // Implement navigation to Products
+                    window.location.href = '/dsproduct';
                     break;
                 case 'FloorPlans':
-                    // Implement navigation to FloorPlans
+                    window.location.href = '/dsfloorplan';
                     break;
                 case 'Planograms':
-                    // Implement navigation to Planograms
-                    break;
-                case 'Positions':
-                    // Implement navigation to Positions
+                    window.location.href = '/dsplanogram';
                     break;
                 case 'Performance':
-                    // Implement navigation to Performance
+                    window.location.href = '/dsperformance';
+                    break;
+                case 'Positions':
+                    window.location.href = '/dsposition';
                     break;
                 default:
                     console.warn('Unhandled button text:', buttonText);
             }
-        });
+        }
     });
 });

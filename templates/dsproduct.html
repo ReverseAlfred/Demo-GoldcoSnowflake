@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <!-- Link to external CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsproduct.css') }}">
+    <!-- Link to external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/dsproduct.js') }}" defer></script>
+</head>
+
+<body>
+    <!-- Header section -->
+    <header class="header">
+        <h1>Product Management</h1>
+    </header>
+
+    <!-- Main container for layout -->
+    <div class="container">
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <button id="dashboardButton">Dashboard</button>
+            <button id="clusterButton">Cluster</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="productsButton">Products</button>
+            <button id="performanceButton">Performance</button>
+            <button id="positionsButton">Positions</button>
+        </nav>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <!-- Floating message area -->
+            <div id="floatingMessage" class="floating-message"></div>
+
+            <!-- Filter and add button -->
+            <div class="filter-bar">
+                <input type="text" id="filterInput" placeholder="Search products...">
+                <button id="addProductBtn">Add Product</button>
+            </div>
+
+            <!-- Table of products -->
+            <table id="itemsContainer">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                        <th>SKU</th>
+                        <th>Dimensions</th>
+                        <th>Weight</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr class="item">
+                        <td>{{ product[0] }}</td>
+                        <td>{{ product[1] }}</td>
+                        <td>{{ product[2] }}</td>
+                        <td>{{ product[3] }}</td>
+                        <td>{{ product[4] }}</td>
+                        <td>{{ product[5] }}</td>
+                        <td>{{ product[6] }}</td>
+                        <td>{{ product[7] }}</td>
+                        <td>{{ product[8] }}</td>
+                        <td>
+                            <button class="edit-button custom-style" data-id="{{ product[0] }}">Edit</button>
+                            <button class="delete-button custom-style" data-id="{{ product[0] }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <!-- Floating Form -->
+    <div id="floatingFormContainer" class="floating-form-container">
+        <div class="floating-form">
+            <h2 id="formTitle">Add Product</h2>
+            <form id="productForm">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" name="productName">
+
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category">
+
+                <label for="brand">Brand</label>
+                <input type="text" id="brand" name="brand">
+
+                <label for="price">Price</label>
+                <input type="text" id="price" name="price">
+
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description">
+
+                <label for="sku">SKU</label>
+                <input type="text" id="sku" name="sku">
+
+                <label for="dimensions">Dimensions</label>
+                <input type="text" id="dimensions" name="dimensions">
+
+                <label for="weight">Weight</label>
+                <input type="text" id="weight" name="weight">
+
+                <button type="submit">Save</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div id="deleteConfirmation" class="delete-confirmation">
+        <p>Are you sure you want to delete this product?</p>
+        <button id="confirmDelete">Yes</button>
+        <button id="cancelDelete">No</button>
+    </div>
+</body>
+
+</html>

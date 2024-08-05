@@ -1,4 +1,4 @@
-/* Reset default margins and paddings */
+/* Reset default margins and paddings for consistency */
 body, h1, p, button {
     margin: 0;
     padding: 0;
@@ -15,15 +15,15 @@ body {
 }
 
 .header {
-    background: #007bff;
-    color: #fff;
+    background: #007bff; /* Header background color */
+    color: #fff; /* Header text color */
     padding: 1rem;
     text-align: center;
     position: fixed;
     width: 100%;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 1; /* Ensure the header is above other content */
 }
 
 .container {
@@ -53,8 +53,8 @@ body {
     width: 100%;
     padding: 0.8rem;
     margin-bottom: 0.5rem;
-    background-color: #007bff;
-    color: #fff;
+    background-color: #007bff; /* Button background color */
+    color: #fff; /* Button text color */
     border: none;
     border-radius: 4px;
     font-size: 1rem;
@@ -65,7 +65,7 @@ body {
 }
 
 .sidebar button:hover {
-    background-color: #0056b3;
+    background-color: #0056b3; /* Darker button background on hover */
 }
 
 .main-content {
@@ -88,29 +88,29 @@ body {
     color: #fff;
     font-size: 0.875rem;
     transition: opacity 0.3s;
-    opacity: 0;
-    z-index: 1;
+    opacity: 0; /* Hidden by default */
+    z-index: 1; /* Ensure it is above other content */
 }
 
 .floating-message.success {
-    background-color: #28a745; /* Green */
+    background-color: #28a745; /* Green for success messages */
 }
 
 .floating-message.error {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545; /* Red for error messages */
 }
 
 .floating-message.show {
-    opacity: 1;
+    opacity: 1; /* Show the floating message */
 }
 
-/* Responsive Design */
+/* Responsive Design for smaller screens */
 @media (max-width: 768px) {
     .sidebar {
-        width: 100%;
+        width: 100%; /* Full width for sidebar on smaller screens */
         position: relative;
-        height: auto;
-        border-right: none;
+        height: auto; /* Auto height for sidebar */
+        border-right: none; /* Remove right border */
     }
 
     .main-content {
@@ -118,8 +118,7 @@ body {
         padding: 1rem;
     }
 
-    /* Additional styles for smaller screens */
     .header {
-        padding: 0.5rem; /* Adjust header padding */
+        padding: 0.5rem; /* Adjust header padding for smaller screens */
     }
 }

@@ -2,67 +2,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const storeForm = document.getElementById('storeForm');
+    const productForm = document.getElementById('productForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
     const cancelButton = document.getElementById('cancelButton');
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
-    const addButton = document.getElementById('addButton');
+    const addButton = document.getElementById('addProductBtn'); // Updated ID
 
-    let currentItemId = null;
+    let currentProductId = null;
 
     // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !storeForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !productForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
 
     // Sidebar navigation
-    document.getElementById('dashboardButton').addEventListener('click', () => {
-        window.location.href = '/dashboard'; // Update with correct path
-    });
+    const sidebarButtons = {
+        'Dashboard': '/dashboard',
+        'Cluster': '/dscluster',
+        'Stores': '/dsstore',
+        'Products': '/dsproduct',
+        'FloorPlans': '/dsfloorplan',
+        'Planograms': '/dsplanogram',
+        'Performance': '/dsperformance',
+        'Positions': '/dsposition'
+    };
 
-    document.getElementById('clusterButton').addEventListener('click', () => {
-        window.location.href = '/dscluster'; // Update with correct path
-    });
-
-    document.getElementById('productsButton').addEventListener('click', () => {
-        window.location.href = '/dsproduct'; // Update with correct path
-    });
-
-    document.getElementById('storesButton').addEventListener('click', () => {
-        window.location.href = '/dsstore';
-    });
-
-    document.getElementById('floorPlansButton').addEventListener('click', () => {
-        window.location.href = '/dsfloorplan'; // Update with correct path
-    });
-
-    document.getElementById('planogramsButton').addEventListener('click', () => {
-        window.location.href = '/dsplanogram'; // Update with correct path
-    });
-
-    document.getElementById('positionsButton').addEventListener('click', () => {
-        window.location.href = '/dsposition'; // Update with correct path
-    });
-
-    document.getElementById('performanceButton').addEventListener('click', () => {
-        window.location.href = '/dsperformance'; // Update with correct path
+    document.querySelector('.sidebar').addEventListener('click', (event) => {
+        // Check if the clicked element is a button
+        if (event.target.tagName === 'BUTTON') {
+            const buttonText = event.target.textContent.trim();
+            if (sidebarButtons[buttonText]) {
+                window.location.href = sidebarButtons[buttonText];
+                showMessage('success', `${buttonText} clicked!`);
+            }
+        }
     });
 
     // Fetch and populate items
     async function fetchItems() {
         try {
-            const response = await fetch('/dsstore');
+            const response = await fetch('/dsproduct');
             const data = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching store data:', error);
-            showMessage('error', 'Failed to load store data.');
+            console.error('Error fetching product data:', error);
+            showMessage('error', 'Failed to load product data.');
         }
     }
 
@@ -80,9 +70,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Show floating form
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add Store';
-        storeForm.reset();
-        currentItemId = null;
+        document.getElementById('formTitle').textContent = 'Add Product';
+        productForm.reset();
+        currentProductId = null;
         floatingFormContainer.style.display = 'flex';
     });
 
@@ -91,27 +81,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save store (Add/Edit)
-    storeForm.addEventListener('submit', async (event) => {
+    // Save product (Add/Edit)
+    productForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Form validation
-        if (!storeForm.checkValidity()) {
+        if (!productForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(storeForm);
+        const formData = new FormData(productForm);
         const data = {
-            storeId: currentItemId,
-            storeName: formData.get('storeName'),
-            location: formData.get('location'),
-            size: formData.get('size'),
-            manager: formData.get('manager'),
-            contactInfo: formData.get('contactInfo')
+            productId: currentProductId,
+            productName: formData.get('productName'),
+            category: formData.get('category'),
+            brand: formData.get('brand'),
+            price: formData.get('price'),
+            description: formData.get('description'),
+            sku: formData.get('sku'),
+            dimensions: formData.get('dimensions'),
+            weight: formData.get('weight')
         };
 
-        const url = currentItemId ? `/dsstore/update_store` : '/dsstore/add';
+        const url = currentProductId ? `/dsproduct/update_product` : '/dsproduct/add';
 
         try {
             const response = await fetch(url, {
@@ -125,11 +118,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentItemId ? 'Store updated successfully.' : 'Store added successfully.');
+                showMessage('success', currentProductId ? 'Product updated successfully.' : 'Product added successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save store.');
+                throw new Error(result.message || 'Failed to save product.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -139,21 +132,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
-            currentItemId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit Store';
+            currentProductId = event.target.getAttribute('data-id');
+            document.getElementById('formTitle').textContent = 'Edit Product';
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('storeName').value = fields[1].textContent;
-            document.getElementById('location').value = fields[2].textContent;
-            document.getElementById('size').value = fields[3].textContent;
-            document.getElementById('manager').value = fields[4].textContent;
-            document.getElementById('contactInfo').value = fields[5].textContent;
+            document.getElementById('productName').value = fields[1].textContent;
+            document.getElementById('category').value = fields[2].textContent;
+            document.getElementById('brand').value = fields[3].textContent;
+            document.getElementById('price').value = fields[4].textContent;
+            document.getElementById('description').value = fields[5].textContent;
+            document.getElementById('sku').value = fields[6].textContent;
+            document.getElementById('dimensions').value = fields[7].textContent;
+            document.getElementById('weight').value = fields[8].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
         if (event.target.classList.contains('delete-button')) {
-            currentItemId = event.target.getAttribute('data-id');
+            currentProductId = event.target.getAttribute('data-id');
             deleteConfirmation.style.display = 'flex';
         }
     });
@@ -161,22 +157,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsstore/delete_store`, {
+            const response = await fetch(`/dsproduct/delete_product`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ storeId: currentItemId }),
+                body: JSON.stringify({ productId: currentProductId }),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', 'Store deleted successfully.');
+                showMessage('success', 'Product deleted successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete store.');
+                throw new Error(result.message || 'Failed to delete product.');
             }
         } catch (error) {
             showMessage('error', error.message);
