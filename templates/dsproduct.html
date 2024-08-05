@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +10,6 @@
     <!-- Link to external JavaScript file -->
     <script src="{{ url_for('static', filename='js/dsproduct.js') }}" defer></script>
 </head>
-
 <body>
     <!-- Header section -->
     <header class="header">
@@ -40,7 +38,7 @@
             <!-- Filter and add button -->
             <div class="filter-bar">
                 <input type="text" id="filterInput" placeholder="Search products...">
-                <button id="addProductBtn">Add Product</button>
+                <button id="addProductBtn" class="custom-style">Add Product</button>
             </div>
 
             <!-- Table of products -->
@@ -88,28 +86,28 @@
             <h2 id="formTitle">Add Product</h2>
             <form id="productForm">
                 <label for="productName">Product Name</label>
-                <input type="text" id="productName" name="productName">
+                <input type="text" id="productName" name="productName" required>
 
                 <label for="category">Category</label>
-                <input type="text" id="category" name="category">
+                <input type="text" id="category" name="category" required>
 
                 <label for="brand">Brand</label>
-                <input type="text" id="brand" name="brand">
+                <input type="text" id="brand" name="brand" required>
 
                 <label for="price">Price</label>
-                <input type="text" id="price" name="price">
+                <input type="text" id="price" name="price" required>
 
                 <label for="description">Description</label>
-                <input type="text" id="description" name="description">
+                <input type="text" id="description" name="description" required>
 
                 <label for="sku">SKU</label>
-                <input type="text" id="sku" name="sku">
+                <input type="text" id="sku" name="sku" required>
 
                 <label for="dimensions">Dimensions</label>
-                <input type="text" id="dimensions" name="dimensions">
+                <input type="text" id="dimensions" name="dimensions" required>
 
                 <label for="weight">Weight</label>
-                <input type="text" id="weight" name="weight">
+                <input type="text" id="weight" name="weight" required>
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>
@@ -124,5 +122,4 @@
         <button id="cancelDelete">No</button>
     </div>
 </body>
-
 </html>

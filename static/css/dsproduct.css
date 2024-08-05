@@ -1,171 +1,154 @@
-/* Reset default margins and paddings */
-body, h1, p, button {
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    box-sizing: border-box;
-}
-
-.header {
-    background: #007bff;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
+/* General layout styles */
 .container {
     display: flex;
-    margin-top: 4rem; /* Space for fixed header */
-    height: calc(100vh - 4rem); /* Adjust height to fit below the header */
-    box-sizing: border-box;
+    height: 100vh;
+    overflow: hidden;
 }
 
+/* Sidebar styles */
 .sidebar {
     width: 200px;
-    background: #ffffff;
-    padding: 1rem;
-    border-right: 1px solid #ddd;
-    position: fixed;
-    height: calc(100vh - 4rem);
-    top: 4rem;
-    left: 0;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    background-color: #333;
+    padding: 10px;
     box-sizing: border-box;
-    overflow: hidden;
 }
 
 .sidebar button {
-    display: block;
     width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 0.5rem;
-    background-color: #007bff;
-    color: #fff;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #444;
+    color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 1rem;
     cursor: pointer;
-    text-align: left;
-    box-sizing: border-box;
-    transition: background-color 0.3s;
 }
 
 .sidebar button:hover {
-    background-color: #0056b3;
+    background-color: #555;
 }
 
+/* Main content styles */
 .main-content {
-    margin-left: 200px; /* Space for sidebar */
-    padding: 1rem;
-    flex: 1;
-    background: #fff;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+    padding: 20px;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow-y: auto; /* Add scrollbar for content overflow */
+    max-height: calc(100vh - 40px); /* Adjust height to fit the container */
 }
 
-#itemsContainer {
-    width: 100%; /* Make itemsContainer fit the full width of main-content */
-    box-sizing: border-box;
-}
-
-/* Filter bar styling */
 .filter-bar {
     display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding: 0 1rem;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#filterInput {
+    width: 70%;
+    padding: 10px;
     box-sizing: border-box;
 }
 
-.filter-bar input {
-    flex: 1;
-    padding: 0.5rem;
+#addProductBtn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#addProductBtn:hover {
+    background-color: #218838;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
     border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-right: 0.5rem;
+    padding: 8px;
+    text-align: left;
 }
 
-.filter-bar button {
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+th {
+    background-color: #f2f2f2;
 }
 
-.filter-bar button:hover {
-    background-color: #0056b3;
+.item {
+    background-color: #f9f9f9;
 }
 
-/* Style for buttons similar to addButton */
-button.custom-style {
-    padding: 0.8rem 1.5rem; /* Larger padding for prominent buttons */
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem; /* Larger font size */
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    color: #fff;
-    min-width: 100px; /* Minimum width for consistency */
-    text-align: center; /* Center text in button */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow for better visibility */
+.item:hover {
+    background-color: #f1f1f1;
 }
 
-/* Buttons like addButton */
-#addButton.custom-style {
-    background-color: #007bff;
-}
-
-#addButton.custom-style:hover {
-    background-color: #0056b3;
-}
-
-/* Edit button styling */
-.edit-button.custom-style {
-    background-color: #15bd23;
-}
-
-.edit-button.custom-style:hover {
-    background-color: #0056b3;
-}
-
-/* Delete button styling */
-.delete-button.custom-style {
-    background-color: #dc3545;
-}
-
-.delete-button.custom-style:hover {
-    background-color: #c82333;
-}
-
-.floating-message {
+/* Floating form styles */
+.floating-form-container {
+    display: none;
     position: fixed;
-    bottom: 1rem;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    overflow: auto; /* Add scrollbar if needed */
+    z-index: 1000; /* Ensure it appears above other content */
+}
+
+.floating-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    max-height: 90vh; /* Limit height to fit in viewport */
+    overflow-y: auto; /* Add scrollbar if content overflows */
+}
+
+.floating-form h2 {
+    margin-top: 0;
+}
+
+.floating-form label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.floating-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.floating-form button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.floating-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Floating message styles */
+.floating-message {
+    display: none;
+    position: fixed;
+    bottom: 20px; /* Position at the bottom */
     left: 50%;
     transform: translateX(-50%);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    color: #fff;
-    font-size: 0.875rem;
-    transition: opacity 0.3s;
-    opacity: 0;
-    z-index: 1000; /* Ensure floating messages appear above other elements */
+    padding: 15px 30px; /* Larger padding for a larger message */
+    border-radius: 8px; /* Larger border radius */
+    color: white;
+    font-size: 16px; /* Larger font size */
+    z-index: 1200; /* Ensure it appears above other content */
+    pointer-events: none; /* Prevent interaction */
 }
 
 .floating-message.success {
@@ -176,52 +159,37 @@ button.custom-style {
     background-color: #dc3545;
 }
 
-.floating-message.show {
-    opacity: 1;
-}
-
-/* Floating form for adding and editing */
-#floatingFormContainer {
+/* Delete confirmation styles */
+.delete-confirmation {
+    display: none;
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    width: 90%;
-    max-width: 600px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Ensure it appears above other content */
 }
 
-.floating-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
+.delete-confirmation p {
+    margin: 0 0 20px;
 }
 
-.floating-form input {
-    width: calc(100% - 2rem);
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+.delete-confirmation button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
 }
 
-#deleteConfirmation {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    display: none; /* Hidden by default */
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
+.delete-confirmation button:first-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-confirmation button:last-child {
+    background-color: #6c757d;
+    color: white;
 }

@@ -188,8 +188,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showMessage(type, message) {
         floatingMessage.textContent = message;
         floatingMessage.className = `floating-message ${type} show`;
+        floatingMessage.style.display = 'block'; // Ensure it's visible
         setTimeout(() => {
-            floatingMessage.classList.remove('show');
+            floatingMessage.style.display = 'none'; // Hide after timeout
         }, 3000);
     }
 });
