@@ -5,50 +5,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     const storeForm = document.getElementById('storeForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
-    const cancelButton = document.getElementById('cancelButton');
-    const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
+    const confirmDeleteButton = document.getElementById('confirmDelete');
     const addButton = document.getElementById('addButton');
-
+    
     let currentItemId = null;
 
     // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !storeForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !storeForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
 
     // Sidebar navigation
-    document.getElementById('dashboardButton').addEventListener('click', () => {
-        window.location.href = '/dashboard'; // Update with correct path
-    });
+    const sidebarButtons = {
+        'Dashboard': '/dashboard',
+        'Cluster': '/dscluster',
+        'Stores': '/dsstore',
+        'Products': '/dsproduct',
+        'FloorPlans': '/dsfloorplan',
+        'Planograms': '/dsplanogram',
+        'Performance': '/dsperformance',
+        'Positions': '/dsposition'
+    };
 
-    document.getElementById('clusterButton').addEventListener('click', () => {
-        window.location.href = '/dscluster'; // Update with correct path
-    });
-
-    document.getElementById('productsButton').addEventListener('click', () => {
-        window.location.href = '/dsproduct'; // Update with correct path
-    });
-
-    document.getElementById('storesButton').addEventListener('click', () => {
-        window.location.href = '/dsstore';
-    });
-
-    document.getElementById('floorPlansButton').addEventListener('click', () => {
-        window.location.href = '/dsfloorplan'; // Update with correct path
-    });
-
-    document.getElementById('planogramsButton').addEventListener('click', () => {
-        window.location.href = '/dsplanogram'; // Update with correct path
-    });
-
-    document.getElementById('positionsButton').addEventListener('click', () => {
-        window.location.href = '/dsposition'; // Update with correct path
-    });
-
-    document.getElementById('performanceButton').addEventListener('click', () => {
-        window.location.href = '/dsperformance'; // Update with correct path
+    document.querySelector('.sidebar').addEventListener('click', (event) => {
+        if (event.target.tagName === 'BUTTON') {
+            const buttonText = event.target.textContent.trim();
+            if (sidebarButtons[buttonText]) {
+                window.location.href = sidebarButtons[buttonText];
+                showMessage('success', `${buttonText} clicked!`);
+            }
+        }
     });
 
     // Fetch and populate items
@@ -87,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Cancel floating form
-    cancelButton.addEventListener('click', () => {
+    document.getElementById('cancelButton').addEventListener('click', () => {
         floatingFormContainer.style.display = 'none';
     });
 
@@ -108,7 +96,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             location: formData.get('location'),
             size: formData.get('size'),
             manager: formData.get('manager'),
-            contactInfo: formData.get('contactInfo')
+            contactInfo: formData.get('contactInfo'),
+            clusterId: formData.get('clusterId') // Added Cluster ID
         };
 
         const url = currentItemId ? `/dsstore/update_store` : '/dsstore/add';
@@ -149,6 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('size').value = fields[3].textContent;
             document.getElementById('manager').value = fields[4].textContent;
             document.getElementById('contactInfo').value = fields[5].textContent;
+            document.getElementById('clusterId').value = fields[6].textContent; // Added Cluster ID
             floatingFormContainer.style.display = 'flex';
         }
 
@@ -192,8 +182,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showMessage(type, message) {
         floatingMessage.textContent = message;
         floatingMessage.className = `floating-message ${type} show`;
+        floatingMessage.style.display = 'block'; // Ensure it's visible
         setTimeout(() => {
-            floatingMessage.classList.remove('show');
+            floatingMessage.style.display = 'none'; // Hide after timeout
         }, 3000);
     }
 });

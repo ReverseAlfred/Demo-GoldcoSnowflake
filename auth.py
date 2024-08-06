@@ -2,7 +2,6 @@ from flask import Blueprint, request, redirect, url_for, make_response, render_t
 import snowflake.connector
 from config import Config
 
-# Create a Blueprint for authentication-related routes
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -11,7 +10,6 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Validate presence of username and password
         if not username or not password:
             return "Username and password are required.", 400
 
@@ -27,7 +25,7 @@ def login():
             )
             conn.close()
 
-            # Set cookies with login data and redirect to the dashboard
+            # Set cookies with login data
             resp = make_response(redirect(url_for('dashboard.dashboard')))
             resp.set_cookie('snowflake_username', username)
             resp.set_cookie('snowflake_password', password)
@@ -37,5 +35,5 @@ def login():
         except snowflake.connector.errors.DatabaseError:
             return "Login failed. Please check your credentials and try again.", 400
 
-    # Render login form for GET requests
     return render_template('login.html')
+    

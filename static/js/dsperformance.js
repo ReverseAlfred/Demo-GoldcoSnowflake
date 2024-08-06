@@ -2,23 +2,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const productForm = document.getElementById('productForm');
+    const performanceForm = document.getElementById('performanceForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
-    const cancelButton = document.getElementById('cancelButton');
-    const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
-    const addButton = document.getElementById('addProductBtn'); // Updated ID
+    const confirmDeleteButton = document.getElementById('confirmDelete');
+    const addButton = document.getElementById('addButton');
+    
+    let currentItemId = null;
 
-    let currentProductId = null;
-
-    // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !productForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !performanceForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
 
-    // Sidebar navigation
     const sidebarButtons = {
         'Dashboard': '/dashboard',
         'Cluster': '/dscluster',
@@ -31,7 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     document.querySelector('.sidebar').addEventListener('click', (event) => {
-        // Check if the clicked element is a button
         if (event.target.tagName === 'BUTTON') {
             const buttonText = event.target.textContent.trim();
             if (sidebarButtons[buttonText]) {
@@ -41,24 +37,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Fetch and populate items
     async function fetchItems() {
         try {
-            const response = await fetch('/dsproduct');
+            const response = await fetch('/dsperformance');
             const data = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching product data:', error);
-            showMessage('error', 'Failed to load product data.');
+            console.error('Error fetching performance data:', error);
+            showMessage('error', 'Failed to load performance data.');
         }
     }
 
     await fetchItems();
 
-    // Filter items
     filterInput.addEventListener('input', () => {
         const filterText = filterInput.value.toLowerCase();
         const items = itemsContainer.querySelectorAll('.item');
@@ -68,43 +62,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Show floating form
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add Product';
-        productForm.reset();
-        currentProductId = null;
+        document.getElementById('formTitle').textContent = 'Add Performance';
+        performanceForm.reset();
+        currentItemId = null;
         floatingFormContainer.style.display = 'flex';
     });
 
-    // Cancel floating form
-    cancelButton.addEventListener('click', () => {
+    document.getElementById('cancelButton').addEventListener('click', () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save product (Add/Edit)
-    productForm.addEventListener('submit', async (event) => {
+    performanceForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Form validation
-        if (!productForm.checkValidity()) {
+        if (!performanceForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(productForm);
+        const formData = new FormData(performanceForm);
         const data = {
-            upc: currentProductId,
-            productName: formData.get('productName'),
-            category: formData.get('category'),
-            brand: formData.get('brand'),
-            price: formData.get('price'),
-            description: formData.get('description'),
-            sku: formData.get('sku'),
-            dimensions: formData.get('dimensions'),
-            weight: formData.get('weight')
+            performanceId: currentItemId,
+            positionId: formData.get('positionId'),
+            salesVolume: formData.get('salesVolume'),
+            salesRevenue: formData.get('salesRevenue'),
+            stockLevel: formData.get('stockLevel'),
+            restockFrequency: formData.get('restockFrequency'),
+            date: formData.get('date')
         };
 
-        const url = currentProductId ? `/dsproduct/update_product` : '/dsproduct/add';
+        const url = currentItemId ? `/dsperformance/update_performance` : '/dsperformance/add';
 
         try {
             const response = await fetch(url, {
@@ -118,79 +106,72 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentProductId ? 'Product updated successfully.' : 'Product added successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                showMessage('success', currentItemId ? 'Performance updated successfully.' : 'Performance added successfully.');
+                await fetchItems();
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save product.');
+                throw new Error(result.message || 'Failed to save performance.');
             }
         } catch (error) {
             showMessage('error', error.message);
         }
     });
 
-    // Edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
-            currentProductId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit Product';
-            // Populate form with current item details
+            currentItemId = event.target.getAttribute('data-id');
+            document.getElementById('formTitle').textContent = 'Edit Performance';
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('productName').value = fields[1].textContent;
-            document.getElementById('category').value = fields[2].textContent;
-            document.getElementById('brand').value = fields[3].textContent;
-            document.getElementById('price').value = fields[4].textContent;
-            document.getElementById('description').value = fields[5].textContent;
-            document.getElementById('sku').value = fields[6].textContent;
-            document.getElementById('dimensions').value = fields[7].textContent;
-            document.getElementById('weight').value = fields[8].textContent;
+            document.getElementById('positionId').value = fields[1].textContent;
+            document.getElementById('salesVolume').value = fields[2].textContent;
+            document.getElementById('salesRevenue').value = fields[3].textContent;
+            document.getElementById('stockLevel').value = fields[4].textContent;
+            document.getElementById('restockFrequency').value = fields[5].textContent;
+            document.getElementById('date').value = fields[6].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
         if (event.target.classList.contains('delete-button')) {
-            currentProductId = event.target.getAttribute('data-id');
+            currentItemId = event.target.getAttribute('data-id');
             deleteConfirmation.style.display = 'flex';
         }
     });
 
-    // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsproduct/delete_product`, {
+            const response = await fetch(`/dsperformance/delete_performance`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ upc: currentProductId }),
+                body: JSON.stringify({ performanceId: currentItemId }),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', 'Product deleted successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                showMessage('success', 'Performance deleted successfully.');
+                await fetchItems();
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete product.');
+                throw new Error(result.message || 'Failed to delete performance.');
             }
         } catch (error) {
             showMessage('error', error.message);
         }
     });
 
-    // Cancel delete
     cancelDeleteButton.addEventListener('click', () => {
         deleteConfirmation.style.display = 'none';
     });
 
-    // Show message
     function showMessage(type, message) {
         floatingMessage.textContent = message;
         floatingMessage.className = `floating-message ${type} show`;
-        floatingMessage.style.display = 'block'; // Ensure it's visible
+        floatingMessage.style.display = 'block';
         setTimeout(() => {
-            floatingMessage.style.display = 'none'; // Hide after timeout
+            floatingMessage.style.display = 'none';
         }, 3000);
     }
 });

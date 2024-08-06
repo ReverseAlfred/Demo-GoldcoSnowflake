@@ -22,7 +22,7 @@ def fetch_products(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT PRODUCTID, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM products")
+        cursor.execute("SELECT UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM PRODUCTS")
         return cursor.fetchall()
     except Exception as e:
         raise e
@@ -30,13 +30,13 @@ def fetch_products(user, password):
         if conn:
             conn.close()
 
-# Fetch product by ID
-def fetch_product_by_id(user, password, product_id):
+# Fetch product by UPC
+def fetch_product_by_upc(user, password, upc):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT PRODUCTID, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM products WHERE PRODUCTID = %s", (product_id,))
+        cursor.execute("SELECT UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM PRODUCTS WHERE UPC = %s", (upc,))
         return cursor.fetchone()
     except Exception as e:
         raise e
@@ -44,33 +44,18 @@ def fetch_product_by_id(user, password, product_id):
         if conn:
             conn.close()
 
-# Fetch the maximum product ID
-def fetch_max_product_id(user, password):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("SELECT MAX(PRODUCTID) FROM products")
-        result = cursor.fetchone()
-        return result[0] if result[0] is not None else 0
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
-
 # Insert a new product
-def insert_product(user, password, product_id, product_name, category, brand, price, description, sku, dimensions, weight):
+def insert_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO products (PRODUCTID, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT) 
+            INSERT INTO PRODUCTS (UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (product_id, product_name, category, brand, price, description, sku, dimensions, weight))
+        """, (upc, product_name, category, brand, price, description, sku, dimensions, weight))
         conn.commit()
-        print(f"Inserted product ID: {product_id}")
+        print(f"Inserted product UPC: {upc}")
     except Exception as e:
         raise e
     finally:
@@ -78,18 +63,18 @@ def insert_product(user, password, product_id, product_name, category, brand, pr
             conn.close()
 
 # Update an existing product
-def update_product(user, password, product_id, product_name, category, brand, price, description, sku, dimensions, weight):
+def update_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE products
+            UPDATE PRODUCTS
             SET PRODUCTNAME = %s, CATEGORY = %s, BRAND = %s, PRICE = %s, DESCRIPTION = %s, SKU = %s, DIMENSIONS = %s, WEIGHT = %s
-            WHERE PRODUCTID = %s
-        """, (product_name, category, brand, price, description, sku, dimensions, weight, product_id))
+            WHERE UPC = %s
+        """, (product_name, category, brand, price, description, sku, dimensions, weight, upc))
         conn.commit()
-        print(f"Updated product ID: {product_id}")
+        print(f"Updated product UPC: {upc}")
     except Exception as e:
         raise e
     finally:
@@ -97,14 +82,14 @@ def update_product(user, password, product_id, product_name, category, brand, pr
             conn.close()
 
 # Delete a product
-def delete_product(user, password, product_id):
+def delete_product(user, password, upc):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM products WHERE PRODUCTID = %s", (product_id,))
+        cursor.execute("DELETE FROM PRODUCTS WHERE UPC = %s", (upc,))
         conn.commit()
-        print(f"Deleted product ID: {product_id}")
+        print(f"Deleted product UPC: {upc}")
     except Exception as e:
         raise e
     finally:
@@ -127,7 +112,7 @@ def dsproduct():
 
     return render_template('dsproduct.html', products=products)
 
-# Route to get a product by ID
+# Route to get a product by UPC
 @product_bp.route('/get_product', methods=['GET'])
 def get_product():
     user = request.cookies.get('snowflake_username')
@@ -136,12 +121,12 @@ def get_product():
     if not user or not password:
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
-    product_id = request.args.get('productId')
-    if not product_id:
-        return jsonify({"success": False, "message": "Product ID is required"}), 400
+    upc = request.args.get('upc')
+    if not upc:
+        return jsonify({"success": False, "message": "UPC is required"}), 400
 
     try:
-        product = fetch_product_by_id(user, password, product_id)
+        product = fetch_product_by_upc(user, password, upc)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -149,7 +134,7 @@ def get_product():
         return jsonify({
             "success": True,
             "product": {
-                "productId": product[0],
+                "upc": product[0],
                 "productName": product[1],
                 "category": product[2],
                 "brand": product[3],
@@ -173,6 +158,7 @@ def add_product():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
+    upc = data.get('upc')
     product_name = data.get('productName')
     category = data.get('category')
     brand = data.get('brand')
@@ -182,13 +168,11 @@ def add_product():
     dimensions = data.get('dimensions')
     weight = data.get('weight')
     
-    if not (product_name and category and brand and price and description and sku and dimensions and weight):
+    if not (upc and product_name and category and brand and price and description and sku and dimensions and weight):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        max_id = fetch_max_product_id(user, password)
-        new_product_id = max_id + 1
-        insert_product(user, password, new_product_id, product_name, category, brand, price, description, sku, dimensions, weight)
+        insert_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -204,7 +188,7 @@ def update_product_route():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    product_id = data.get('productId')
+    upc = data.get('upc')
     product_name = data.get('productName')
     category = data.get('category')
     brand = data.get('brand')
@@ -214,11 +198,11 @@ def update_product_route():
     dimensions = data.get('dimensions')
     weight = data.get('weight')
 
-    if not (product_id and product_name and category and brand and price and description and sku and dimensions and weight):
+    if not (upc and product_name and category and brand and price and description and sku and dimensions and weight):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_product(user, password, product_id, product_name, category, brand, price, description, sku, dimensions, weight)
+        update_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -234,13 +218,13 @@ def delete_product_route():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    product_id = data.get('productId')
+    upc = data.get('upc')
 
-    if not product_id:
-        return jsonify({"success": False, "message": "Product ID is required"}), 400
+    if not upc:
+        return jsonify({"success": False, "message": "UPC is required"}), 400
 
     try:
-        delete_product(user, password, product_id)
+        delete_product(user, password, upc)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

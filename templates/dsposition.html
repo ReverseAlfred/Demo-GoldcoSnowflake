@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS Positions</title>
+    <!-- Link to external CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsposition.css') }}">
+</head>
+
+<body>
+    <!-- Header section -->
+    <div class="header">
+        <h1>Positions Management</h1>
+    </div>
+
+    <!-- Main container for layout -->
+    <div class="container">
+        <!-- Sidebar navigation -->
+        <div class="sidebar">
+            <button id="dashboardButton">Dashboard</button>
+            <button id="clusterButton">Cluster</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="productsButton">Products</button>
+            <button id="performanceButton">Performance</button>
+            <button id="positionsButton">Positions</button>
+        </div>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Floating message area -->
+            <div id="floatingMessage" class="floating-message"></div>
+
+            <!-- Filter and add button -->
+            <div class="filter-bar">
+                <input type="text" id="filterInput" placeholder="Search...">
+                <button id="addButton" class="custom-style">Add Position</button>
+            </div>
+
+            <!-- Table of positions -->
+            <table id="itemsContainer">
+                <thead>
+                    <tr>
+                        <th>Position ID</th>
+                        <th>Planogram ID</th>
+                        <th>UPC</th>
+                        <th>X Coordinate</th>
+                        <th>Y Coordinate</th>
+                        <th>Z Coordinate</th>
+                        <th>Facing</th>
+                        <th>Shelf Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for position in positions %}
+                    <tr class="item">
+                        <td>{{ position[0] }}</td>
+                        <td>{{ position[1] }}</td>
+                        <td>{{ position[2] }}</td>
+                        <td>{{ position[3] }}</td>
+                        <td>{{ position[4] }}</td>
+                        <td>{{ position[5] }}</td>
+                        <td>{{ position[6] }}</td>
+                        <td>{{ position[7] }}</td>
+                        <td>
+                            <button class="edit-button custom-style" data-id="{{ position[0] }}">Edit</button>
+                            <button class="delete-button custom-style" data-id="{{ position[0] }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Form -->
+    <div id="floatingFormContainer" class="floating-form-container">
+        <div class="floating-form">
+            <h2 id="formTitle">Add Position</h2>
+            <form id="positionForm">
+                <label for="planogramId">Planogram ID</label>
+                <input type="number" id="planogramId" name="planogramId" required>
+
+                <label for="upc">UPC</label>
+                <input type="text" id="upc" name="upc" required>
+
+                <label for="xCoordinate">X Coordinate</label>
+                <input type="number" id="xCoordinate" name="xCoordinate">
+
+                <label for="yCoordinate">Y Coordinate</label>
+                <input type="number" id="yCoordinate" name="yCoordinate">
+
+                <label for="zCoordinate">Z Coordinate</label>
+                <input type="number" id="zCoordinate" name="zCoordinate">
+
+                <label for="facing">Facing</label>
+                <input type="number" id="facing" name="facing">
+
+                <label for="shelfLevel">Shelf Level</label>
+                <input type="number" id="shelfLevel" name="shelfLevel">
+
+                <button type="submit">Save</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div id="deleteConfirmation" class="delete-confirmation">
+        <p>Are you sure you want to delete this position?</p>
+        <button id="confirmDelete" class="custom-style">Yes</button>
+        <button id="cancelDelete" class="custom-style">No</button>
+    </div>
+
+    <!-- Link to external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/dsposition.js') }}"></script>
+</body>
+
+</html>

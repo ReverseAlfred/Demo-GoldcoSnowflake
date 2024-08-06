@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DS Store</title>
+    <title>DS FloorPlan</title>
     <!-- Link to external CSS stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsstore.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsfloorplan.css') }}">
 </head>
 
 <body>
     <!-- Header section -->
     <div class="header">
-        <h1>Store Management</h1>
+        <h1>FloorPlan Management</h1>
     </div>
 
     <!-- Main container for layout -->
@@ -37,36 +37,32 @@
             <!-- Filter and add button -->
             <div class="filter-bar">
                 <input type="text" id="filterInput" placeholder="Search...">
-                <button id="addButton" class="custom-style">Add Store</button>
+                <button id="addButton" class="custom-style">Add FloorPlan</button>
             </div>
 
-            <!-- Table of stores -->
+            <!-- Table of floorplans -->
             <table id="itemsContainer">
                 <thead>
                     <tr>
+                        <th>FloorPlan ID</th>
                         <th>Store ID</th>
-                        <th>Name</th>
-                        <th>Location</th>
-                        <th>Size</th>
-                        <th>Manager</th>
-                        <th>Contact Info</th>
-                        <th>Cluster ID</th>
+                        <th>Description</th>
+                        <th>Layout Image</th>
+                        <th>Dimensions</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for store in stores %}
+                    {% for floorplan in floorplans %}
                     <tr class="item">
-                        <td>{{ store[0] }}</td>
-                        <td>{{ store[1] }}</td>
-                        <td>{{ store[2] }}</td>
-                        <td>{{ store[3] }}</td>
-                        <td>{{ store[4] }}</td>
-                        <td>{{ store[5] }}</td>
-                        <td>{{ store[6] }}</td>
+                        <td>{{ floorplan[0] }}</td>
+                        <td>{{ floorplan[1] }}</td>
+                        <td>{{ floorplan[2] }}</td>
+                        <td>{{ floorplan[3] }}</td>
+                        <td>{{ floorplan[4] }}</td>
                         <td>
-                            <button class="edit-button custom-style" data-id="{{ store[0] }}">Edit</button>
-                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Delete</button>
+                            <button class="edit-button custom-style" data-id="{{ floorplan[0] }}">Edit</button>
+                            <button class="delete-button custom-style" data-id="{{ floorplan[0] }}">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -78,25 +74,19 @@
     <!-- Floating Form -->
     <div id="floatingFormContainer" class="floating-form-container">
         <div class="floating-form">
-            <h2 id="formTitle">Add Store</h2>
-            <form id="storeForm">
-                <label for="storeName">Name</label>
-                <input type="text" id="storeName" name="storeName">
+            <h2 id="formTitle">Add FloorPlan</h2>
+            <form id="floorplanForm">
+                <label for="storeId">Store ID</label>
+                <input type="number" id="storeId" name="storeId">
 
-                <label for="location">Location</label>
-                <input type="text" id="location" name="location">
+                <label for="floorplanDescription">Description</label>
+                <input type="text" id="floorplanDescription" name="floorplanDescription">
 
-                <label for="size">Size</label>
-                <input type="text" id="size" name="size">
+                <label for="layoutImage">Layout Image</label>
+                <input type="text" id="layoutImage" name="layoutImage">
 
-                <label for="manager">Manager</label>
-                <input type="text" id="manager" name="manager">
-
-                <label for="contactInfo">Contact Info</label>
-                <input type="text" id="contactInfo" name="contactInfo">
-
-                <label for="clusterId">Cluster ID</label>
-                <input type="number" id="clusterId" name="clusterId">
+                <label for="dimensions">Dimensions</label>
+                <input type="text" id="dimensions" name="dimensions">
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>
@@ -106,13 +96,13 @@
 
     <!-- Delete Confirmation -->
     <div id="deleteConfirmation" class="delete-confirmation">
-        <p>Are you sure you want to delete this store?</p>
+        <p>Are you sure you want to delete this floorplan?</p>
         <button id="confirmDelete" class="custom-style">Yes</button>
         <button id="cancelDelete" class="custom-style">No</button>
     </div>
 
     <!-- Link to external JavaScript file -->
-    <script src="{{ url_for('static', filename='js/dsstore.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dsfloorplan.js') }}"></script>
 </body>
 
 </html>

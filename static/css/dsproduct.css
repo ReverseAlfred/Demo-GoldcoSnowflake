@@ -1,30 +1,49 @@
+/* Top Title styles */
+.header {
+    background-color: #2c3e50; /* Match sidebar background */
+    color: white;
+    padding: 15px 20px; /* Match padding of sidebar buttons */
+    box-sizing: border-box;
+    font-size: 24px; /* Adjust font size for the title */
+    font-weight: bold;
+    text-align: center; /* Center align the title */
+    border-bottom: 1px solid #34495e; /* Add a border to match sidebar button style */
+    font-family: Arial, sans-serif; /* Match font-family with sidebar */
+}
+
+.header h1 {
+    margin: 0; /* Remove default margin */
+}
+
 /* General layout styles */
 .container {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    font-family: Arial, sans-serif; /* Added font-family for consistency */
 }
 
 /* Sidebar styles */
 .sidebar {
-    width: 200px;
-    background-color: #333;
-    padding: 10px;
+    width: 220px; /* Increased width for better spacing */
+    background-color: #2c3e50; /* Darker shade for better readability */
+    padding: 15px; /* Increased padding */
     box-sizing: border-box;
 }
 
 .sidebar button {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 5px;
-    background-color: #444;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: #34495e; /* Slightly lighter than sidebar background */
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Added border radius for buttons */
 }
 
 .sidebar button:hover {
-    background-color: #555;
+    background-color: #1abc9c; /* Added vibrant hover effect */
 }
 
 /* Main content styles */
@@ -44,20 +63,23 @@
 
 #filterInput {
     width: 70%;
-    padding: 10px;
+    padding: 12px; /* Increased padding for better usability */
     box-sizing: border-box;
+    border: 1px solid #ddd; /* Added border for clarity */
+    border-radius: 5px; /* Added border radius for consistency */
 }
 
 #addProductBtn {
-    padding: 10px 20px;
-    background-color: #28a745;
+    padding: 12px 24px;
+    background-color: #27ae60; /* Green button for positive action */
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Added border radius */
 }
 
 #addProductBtn:hover {
-    background-color: #218838;
+    background-color: #2ecc71; /* Slightly lighter on hover */
 }
 
 /* Table styles */
@@ -68,12 +90,12 @@ table {
 
 th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 10px; /* Increased padding for better readability */
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #ecf0f1; /* Light grey for headers */
 }
 
 .item {
@@ -102,8 +124,8 @@ th {
 .floating-form {
     background-color: white;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px; /* Larger border radius */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4); /* Slightly darker shadow */
     max-height: 90vh; /* Limit height to fit in viewport */
     overflow-y: auto; /* Add scrollbar if content overflows */
 }
@@ -114,26 +136,29 @@ th {
 
 .floating-form label {
     display: block;
-    margin: 10px 0 5px;
+    margin: 12px 0 6px; /* Increased spacing */
 }
 
 .floating-form input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 12px; /* Increased margin for spacing */
     box-sizing: border-box;
+    border: 1px solid #ddd; /* Added border for clarity */
+    border-radius: 5px; /* Added border radius */
 }
 
 .floating-form button {
-    padding: 10px 20px;
-    background-color: #007bff;
+    padding: 12px 24px;
+    background-color: #3498db; /* Blue button for action */
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Added border radius */
 }
 
 .floating-form button:hover {
-    background-color: #0056b3;
+    background-color: #2980b9; /* Slightly darker blue on hover */
 }
 
 /* Floating message styles */
@@ -143,20 +168,20 @@ th {
     bottom: 20px; /* Position at the bottom */
     left: 50%;
     transform: translateX(-50%);
-    padding: 15px 30px; /* Larger padding for a larger message */
+    padding: 20px 40px; /* Larger padding for better visibility */
     border-radius: 8px; /* Larger border radius */
     color: white;
-    font-size: 16px; /* Larger font size */
+    font-size: 18px; /* Larger font size */
     z-index: 1200; /* Ensure it appears above other content */
     pointer-events: none; /* Prevent interaction */
 }
 
 .floating-message.success {
-    background-color: #28a745;
+    background-color: #27ae60; /* Green for success */
 }
 
 .floating-message.error {
-    background-color: #dc3545;
+    background-color: #e74c3c; /* Red for error */
 }
 
 /* Delete confirmation styles */
@@ -168,8 +193,8 @@ th {
     transform: translate(-50%, -50%);
     background-color: white;
     padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px; /* Larger border radius */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4); /* Slightly darker shadow */
     z-index: 1000; /* Ensure it appears above other content */
 }
 
@@ -178,18 +203,19 @@ th {
 }
 
 .delete-confirmation button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     margin-right: 10px;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Added border radius */
 }
 
 .delete-confirmation button:first-child {
-    background-color: #dc3545;
+    background-color: #e74c3c; /* Red for confirmation */
     color: white;
 }
 
 .delete-confirmation button:last-child {
-    background-color: #6c757d;
+    background-color: #95a5a6; /* Gray for cancel */
     color: white;
 }

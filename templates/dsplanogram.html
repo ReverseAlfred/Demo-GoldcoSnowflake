@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planogram Management</title>
+    <!-- Link to external CSS stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dsplanogram.css') }}">
+    <!-- Link to external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/dsplanogram.js') }}" defer></script>
+</head>
+<body>
+    <!-- Header section -->
+    <header class="header">
+        <h1>Planogram Management</h1>
+    </header>
+
+    <!-- Main container for layout -->
+    <div class="container">
+        <!-- Sidebar navigation -->
+        <nav class="sidebar">
+            <button id="dashboardButton">Dashboard</button>
+            <button id="clusterButton">Cluster</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="productsButton">Products</button>
+            <button id="performanceButton">Performance</button>
+            <button id="positionsButton">Positions</button>
+        </nav>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <!-- Floating message area -->
+            <div id="floatingMessage" class="floating-message"></div>
+
+            <!-- Filter and add button -->
+            <div class="filter-bar">
+                <input type="text" id="filterInput" placeholder="Search planograms...">
+                <button id="addPlanogramBtn" class="custom-style">Add Planogram</button>                
+            </div>
+
+            <!-- Table of planograms -->
+            <table id="itemsContainer">
+                <thead>
+                    <tr>
+                        <th>Planogram ID</th>
+                        <th>Planogram Name</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>PDF Path</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for planogram in planograms %}
+                    <tr class="item">
+                        <td>{{ planogram[0] }}</td>
+                        <td>{{ planogram[1] }}</td>
+                        <td>{{ planogram[2] }}</td>
+                        <td>{{ planogram[3] }}</td>
+                        <td><a href="{{ planogram[6] }}" target="_blank">View PDF</a></td>
+                        <td>
+                            <button class="edit-button custom-style" data-id="{{ planogram[0] }}">Edit</button>
+                            <button class="delete-button custom-style" data-id="{{ planogram[0] }}">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <!-- Floating Form -->
+    <div id="floatingFormContainer" class="floating-form-container">
+        <div class="floating-form">
+            <h2 id="formTitle">Add Planogram</h2>
+            <form id="planogramForm">
+                <label for="planogramName">Planogram Name</label>
+                <input type="text" id="planogramName" name="planogramName" required>
+
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" required>
+
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" required>
+
+                <label for="pdfPath">PDF Path</label>
+                <input type="text" id="pdfPath" name="pdfPath" required>
+
+                <button type="submit">Save</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div id="deleteConfirmation" class="delete-confirmation">
+        <p>Are you sure you want to delete this planogram?</p>
+        <button id="confirmDelete">Yes</button>
+        <button id="cancelDelete">No</button>
+    </div>
+</body>
+</html>

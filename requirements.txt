@@ -1,3 +1,2 @@
-python
 flask
 snowflake-connector-python

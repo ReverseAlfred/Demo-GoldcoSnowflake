@@ -2,18 +2,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const productForm = document.getElementById('productForm');
+    const floorplanForm = document.getElementById('floorplanForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
-    const cancelButton = document.getElementById('cancelButton');
-    const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
-    const addButton = document.getElementById('addProductBtn'); // Updated ID
-
-    let currentProductId = null;
+    const confirmDeleteButton = document.getElementById('confirmDelete');
+    const addButton = document.getElementById('addButton');
+    
+    let currentItemId = null;
 
     // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !productForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !floorplanForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
@@ -31,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     document.querySelector('.sidebar').addEventListener('click', (event) => {
-        // Check if the clicked element is a button
         if (event.target.tagName === 'BUTTON') {
             const buttonText = event.target.textContent.trim();
             if (sidebarButtons[buttonText]) {
@@ -44,15 +42,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch and populate items
     async function fetchItems() {
         try {
-            const response = await fetch('/dsproduct');
+            const response = await fetch('/dsfloorplan');
             const data = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching product data:', error);
-            showMessage('error', 'Failed to load product data.');
+            console.error('Error fetching floorplan data:', error);
+            showMessage('error', 'Failed to load floorplan data.');
         }
     }
 
@@ -70,41 +68,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Show floating form
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add Product';
-        productForm.reset();
-        currentProductId = null;
+        document.getElementById('formTitle').textContent = 'Add FloorPlan';
+        floorplanForm.reset();
+        currentItemId = null;
         floatingFormContainer.style.display = 'flex';
     });
 
     // Cancel floating form
-    cancelButton.addEventListener('click', () => {
+    document.getElementById('cancelButton').addEventListener('click', () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save product (Add/Edit)
-    productForm.addEventListener('submit', async (event) => {
+    // Save floorplan (Add/Edit)
+    floorplanForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Form validation
-        if (!productForm.checkValidity()) {
+        if (!floorplanForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(productForm);
+        const formData = new FormData(floorplanForm);
         const data = {
-            upc: currentProductId,
-            productName: formData.get('productName'),
-            category: formData.get('category'),
-            brand: formData.get('brand'),
-            price: formData.get('price'),
-            description: formData.get('description'),
-            sku: formData.get('sku'),
-            dimensions: formData.get('dimensions'),
-            weight: formData.get('weight')
+            floorPlanId: currentItemId,
+            storeId: formData.get('storeId'),
+            floorplanDescription: formData.get('floorplanDescription'),
+            layoutImage: formData.get('layoutImage'),
+            dimensions: formData.get('dimensions')
         };
 
-        const url = currentProductId ? `/dsproduct/update_product` : '/dsproduct/add';
+        const url = currentItemId ? `/dsfloorplan/update_floorplan` : '/dsfloorplan/add';
 
         try {
             const response = await fetch(url, {
@@ -118,11 +112,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentProductId ? 'Product updated successfully.' : 'Product added successfully.');
+                showMessage('success', currentItemId ? 'FloorPlan updated successfully.' : 'FloorPlan added successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save product.');
+                throw new Error(result.message || 'Failed to save floorplan.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -132,24 +126,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
-            currentProductId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit Product';
+            currentItemId = event.target.getAttribute('data-id');
+            document.getElementById('formTitle').textContent = 'Edit FloorPlan';
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('productName').value = fields[1].textContent;
-            document.getElementById('category').value = fields[2].textContent;
-            document.getElementById('brand').value = fields[3].textContent;
-            document.getElementById('price').value = fields[4].textContent;
-            document.getElementById('description').value = fields[5].textContent;
-            document.getElementById('sku').value = fields[6].textContent;
-            document.getElementById('dimensions').value = fields[7].textContent;
-            document.getElementById('weight').value = fields[8].textContent;
+            document.getElementById('storeId').value = fields[1].textContent;
+            document.getElementById('floorplanDescription').value = fields[2].textContent;
+            document.getElementById('layoutImage').value = fields[3].textContent;
+            document.getElementById('dimensions').value = fields[4].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
         if (event.target.classList.contains('delete-button')) {
-            currentProductId = event.target.getAttribute('data-id');
+            currentItemId = event.target.getAttribute('data-id');
             deleteConfirmation.style.display = 'flex';
         }
     });
@@ -157,22 +147,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsproduct/delete_product`, {
+            const response = await fetch(`/dsfloorplan/delete_floorplan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ upc: currentProductId }),
+                body: JSON.stringify({ floorPlanId: currentItemId }),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', 'Product deleted successfully.');
+                showMessage('success', 'FloorPlan deleted successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete product.');
+                throw new Error(result.message || 'Failed to delete floorplan.');
             }
         } catch (error) {
             showMessage('error', error.message);

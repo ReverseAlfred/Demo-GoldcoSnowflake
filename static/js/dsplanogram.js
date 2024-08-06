@@ -2,18 +2,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const productForm = document.getElementById('productForm');
+    const planogramForm = document.getElementById('planogramForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
     const cancelButton = document.getElementById('cancelButton');
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
-    const addButton = document.getElementById('addProductBtn'); // Updated ID
+    const addButton = document.getElementById('addPlanogramBtn');
 
-    let currentProductId = null;
+    let currentPlanogramId = null;
 
     // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !productForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !planogramForm || !floatingMessage || !deleteConfirmation || !cancelButton || !confirmDeleteButton || !cancelDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch and populate items
     async function fetchItems() {
         try {
-            const response = await fetch('/dsproduct');
+            const response = await fetch('/dsplanogram');
             const data = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching product data:', error);
-            showMessage('error', 'Failed to load product data.');
+            console.error('Error fetching planogram data:', error);
+            showMessage('error', 'Failed to load planogram data.');
         }
     }
 
@@ -70,9 +70,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Show floating form
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add Product';
-        productForm.reset();
-        currentProductId = null;
+        document.getElementById('formTitle').textContent = 'Add Planogram';
+        planogramForm.reset();
+        currentPlanogramId = null;
         floatingFormContainer.style.display = 'flex';
     });
 
@@ -81,30 +81,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save product (Add/Edit)
-    productForm.addEventListener('submit', async (event) => {
+    // Save planogram (Add/Edit)
+    planogramForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Form validation
-        if (!productForm.checkValidity()) {
+        if (!planogramForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(productForm);
+        const formData = new FormData(planogramForm);
         const data = {
-            upc: currentProductId,
-            productName: formData.get('productName'),
-            category: formData.get('category'),
-            brand: formData.get('brand'),
-            price: formData.get('price'),
+            planogramId: currentPlanogramId,
+            planogramName: formData.get('planogramName'),
             description: formData.get('description'),
-            sku: formData.get('sku'),
-            dimensions: formData.get('dimensions'),
-            weight: formData.get('weight')
+            category: formData.get('category'),
+            pdfPath: formData.get('pdfPath')
         };
 
-        const url = currentProductId ? `/dsproduct/update_product` : '/dsproduct/add';
+        const url = currentPlanogramId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
 
         try {
             const response = await fetch(url, {
@@ -118,11 +114,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentProductId ? 'Product updated successfully.' : 'Product added successfully.');
+                showMessage('success', currentPlanogramId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save product.');
+                throw new Error(result.message || 'Failed to save planogram.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -132,24 +128,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
-            currentProductId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit Product';
+            currentPlanogramId = event.target.getAttribute('data-id');
+            document.getElementById('formTitle').textContent = 'Edit Planogram';
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('productName').value = fields[1].textContent;
-            document.getElementById('category').value = fields[2].textContent;
-            document.getElementById('brand').value = fields[3].textContent;
-            document.getElementById('price').value = fields[4].textContent;
-            document.getElementById('description').value = fields[5].textContent;
-            document.getElementById('sku').value = fields[6].textContent;
-            document.getElementById('dimensions').value = fields[7].textContent;
-            document.getElementById('weight').value = fields[8].textContent;
+            document.getElementById('planogramName').value = fields[1].textContent;
+            document.getElementById('description').value = fields[2].textContent;
+            document.getElementById('category').value = fields[3].textContent;
+            document.getElementById('pdfPath').value = fields[4].textContent; // Populate PDF Path
             floatingFormContainer.style.display = 'flex';
         }
 
         if (event.target.classList.contains('delete-button')) {
-            currentProductId = event.target.getAttribute('data-id');
+            currentPlanogramId = event.target.getAttribute('data-id');
             deleteConfirmation.style.display = 'flex';
         }
     });
@@ -157,22 +149,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsproduct/delete_product`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ upc: currentProductId }),
+            const response = await fetch(`/dsplanogram/delete_planogram/${currentPlanogramId}`, {
+                method: 'DELETE',
             });
 
-            const result = await response.json();
-
             if (response.ok) {
-                showMessage('success', 'Product deleted successfully.');
+                showMessage('success', 'Planogram deleted successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete product.');
+                throw new Error('Failed to delete planogram.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -187,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show message
     function showMessage(type, message) {
         floatingMessage.textContent = message;
-        floatingMessage.className = `floating-message ${type} show`;
+        floatingMessage.className = `floating-message ${type} show`; // Add 'show' class to make message visible
         floatingMessage.style.display = 'block'; // Ensure it's visible
         setTimeout(() => {
             floatingMessage.style.display = 'none'; // Hide after timeout

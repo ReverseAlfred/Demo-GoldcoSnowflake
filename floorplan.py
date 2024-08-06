@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, jsonify
 import snowflake.connector
 from config import Config
 
-store_bp = Blueprint('store', __name__)
+floorplan_bp = Blueprint('floorplan', __name__)
 
 # Helper function to get Snowflake connection
 def get_snowflake_connection(user, password):
@@ -16,13 +16,16 @@ def get_snowflake_connection(user, password):
         schema=Config.SNOWFLAKE_SCHEMA
     )
 
-# Fetch all stores
-def fetch_stores(user, password):
+# Fetch all floorplans
+def fetch_floorplans(user, password):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT STOREID, STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID FROM stores")
+        cursor.execute("""
+            SELECT FLOORPLANID, STOREID, FLOORPLANDESCRIPTION, LAYOUTIMAGE, DIMENSIONS 
+            FROM FLOORPLANS
+        """)
         return cursor.fetchall()
     except Exception as e:
         raise e
@@ -30,13 +33,17 @@ def fetch_stores(user, password):
         if conn:
             conn.close()
 
-# Fetch store by ID
-def fetch_store_by_id(user, password, store_id):
+# Fetch floorplan by ID
+def fetch_floorplan_by_id(user, password, floorplan_id):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT STOREID, STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID FROM stores WHERE STOREID = %s", (store_id,))
+        cursor.execute("""
+            SELECT FLOORPLANID, STOREID, FLOORPLANDESCRIPTION, LAYOUTIMAGE, DIMENSIONS 
+            FROM FLOORPLANS 
+            WHERE FLOORPLANID = %s
+        """, (floorplan_id,))
         return cursor.fetchone()
     except Exception as e:
         raise e
@@ -44,13 +51,13 @@ def fetch_store_by_id(user, password, store_id):
         if conn:
             conn.close()
 
-# Fetch the maximum store ID
-def fetch_max_store_id(user, password):
+# Fetch the maximum floorplan ID
+def fetch_max_floorplan_id(user, password):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(STOREID) FROM stores")
+        cursor.execute("SELECT MAX(FLOORPLANID) FROM FLOORPLANS")
         result = cursor.fetchone()
         return result[0] if result[0] is not None else 0
     except Exception as e:
@@ -59,61 +66,61 @@ def fetch_max_store_id(user, password):
         if conn:
             conn.close()
 
-# Insert a new store
-def insert_store(user, password, store_name, location, size, manager, contact_info, cluster_id):
+# Insert a new floorplan
+def insert_floorplan(user, password, store_id, floorplan_description, layout_image, dimensions):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO stores (STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID) 
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (store_name, location, size, manager, contact_info, cluster_id))
+            INSERT INTO FLOORPLANS (STOREID, FLOORPLANDESCRIPTION, LAYOUTIMAGE, DIMENSIONS) 
+            VALUES (%s, %s, %s, %s)
+        """, (store_id, floorplan_description, layout_image, dimensions))
         conn.commit()
-        print(f"Inserted store")
+        print(f"Inserted floorplan")
     except Exception as e:
         raise e
     finally:
         if conn:
             conn.close()
 
-# Update an existing store
-def update_store(user, password, store_id, store_name, location, size, manager, contact_info, cluster_id):
+# Update an existing floorplan
+def update_floorplan(user, password, floorplan_id, store_id, floorplan_description, layout_image, dimensions):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE stores
-            SET STORENAME = %s, LOCATION = %s, SIZE = %s, MANAGER = %s, CONTACTINFO = %s, CLUSTERID = %s
-            WHERE STOREID = %s
-        """, (store_name, location, size, manager, contact_info, cluster_id, store_id))
+            UPDATE FLOORPLANS
+            SET STOREID = %s, FLOORPLANDESCRIPTION = %s, LAYOUTIMAGE = %s, DIMENSIONS = %s
+            WHERE FLOORPLANID = %s
+        """, (store_id, floorplan_description, layout_image, dimensions, floorplan_id))
         conn.commit()
-        print(f"Updated store ID: {store_id}")
+        print(f"Updated floorplan ID: {floorplan_id}")
     except Exception as e:
         raise e
     finally:
         if conn:
             conn.close()
 
-# Delete a store
-def delete_store(user, password, store_id):
+# Delete a floorplan
+def delete_floorplan(user, password, floorplan_id):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM stores WHERE STOREID = %s", (store_id,))
+        cursor.execute("DELETE FROM FLOORPLANS WHERE FLOORPLANID = %s", (floorplan_id,))
         conn.commit()
-        print(f"Deleted store ID: {store_id}")
+        print(f"Deleted floorplan ID: {floorplan_id}")
     except Exception as e:
         raise e
     finally:
         if conn:
             conn.close()
 
-# Route to display all stores
-@store_bp.route('/dsstore')
-def dsstore():
+# Route to display all floorplans
+@floorplan_bp.route('/dsfloorplan')
+def dsfloorplan():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
     
@@ -121,76 +128,47 @@ def dsstore():
         return "Error: Missing credentials", 401
     
     try:
-        stores = fetch_stores(user, password)
+        floorplans = fetch_floorplans(user, password)
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-    return render_template('dsstore.html', stores=stores)
+    return render_template('dsfloorplan.html', floorplans=floorplans)
 
-# Route to get a store by ID
-@store_bp.route('/get_store', methods=['GET'])
-def get_store():
+# Route to get a floorplan by ID
+@floorplan_bp.route('/get_floorplan', methods=['GET'])
+def get_floorplan():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
     
     if not user or not password:
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
-    store_id = request.args.get('storeId')
-    if not store_id:
-        return jsonify({"success": False, "message": "Store ID is required"}), 400
+    floorplan_id = request.args.get('floorplanId')
+    if not floorplan_id:
+        return jsonify({"success": False, "message": "Floorplan ID is required"}), 400
 
     try:
-        store = fetch_store_by_id(user, password, store_id)
+        floorplan = fetch_floorplan_by_id(user, password, floorplan_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-    if store:
+    if floorplan:
         return jsonify({
             "success": True,
-            "store": {
-                "storeId": store[0],
-                "storeName": store[1],
-                "location": store[2],
-                "size": store[3],
-                "manager": store[4],
-                "contactInfo": store[5],
-                "clusterId": store[6]
+            "floorplan": {
+                "floorplanId": floorplan[0],
+                "storeId": floorplan[1],
+                "floorplanDescription": floorplan[2],
+                "layoutImage": floorplan[3],
+                "dimensions": floorplan[4]
             }
         })
     else:
-        return jsonify({"success": False, "message": "Store not found"}), 404
+        return jsonify({"success": False, "message": "Floorplan not found"}), 404
 
-# Route to add a new store
-@store_bp.route('/dsstore/add', methods=['POST'])
-def add_store():
-    user = request.cookies.get('snowflake_username')
-    password = request.cookies.get('snowflake_password')
-    
-    if not user or not password:
-        return jsonify({"success": False, "message": "Missing credentials"}), 401
-
-    data = request.get_json()
-    store_name = data.get('storeName')
-    location = data.get('location')
-    size = data.get('size')
-    manager = data.get('manager')
-    contact_info = data.get('contactInfo')
-    cluster_id = data.get('clusterId')
-    
-    if not (store_name and location and size and manager and contact_info and cluster_id):
-        return jsonify({"success": False, "message": "All fields are required"}), 400
-
-    try:
-        insert_store(user, password, store_name, location, size, manager, contact_info, cluster_id)
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-    return jsonify({"success": True}), 200
-
-# Route to update an existing store
-@store_bp.route('/dsstore/update_store', methods=['POST'])
-def update_store_route():
+# Route to add a new floorplan
+@floorplan_bp.route('/dsfloorplan/add', methods=['POST'])
+def add_floorplan():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
     
@@ -199,26 +177,23 @@ def update_store_route():
 
     data = request.get_json()
     store_id = data.get('storeId')
-    store_name = data.get('storeName')
-    location = data.get('location')
-    size = data.get('size')
-    manager = data.get('manager')
-    contact_info = data.get('contactInfo')
-    cluster_id = data.get('clusterId')
-
-    if not (store_id and store_name and location and size and manager and contact_info and cluster_id):
+    floorplan_description = data.get('floorplanDescription')
+    layout_image = data.get('layoutImage')
+    dimensions = data.get('dimensions')
+    
+    if not (store_id and floorplan_description and layout_image and dimensions):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_store(user, password, store_id, store_name, location, size, manager, contact_info, cluster_id)
+        insert_floorplan(user, password, store_id, floorplan_description, layout_image, dimensions)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
     return jsonify({"success": True}), 200
 
-# Route to delete a store
-@store_bp.route('/dsstore/delete_store', methods=['POST'])
-def delete_store_route():
+# Route to update an existing floorplan
+@floorplan_bp.route('/dsfloorplan/update_floorplan', methods=['POST'])
+def update_floorplan_route():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
     
@@ -226,13 +201,39 @@ def delete_store_route():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
+    floorplan_id = data.get('floorplanId')
     store_id = data.get('storeId')
+    floorplan_description = data.get('floorplanDescription')
+    layout_image = data.get('layoutImage')
+    dimensions = data.get('dimensions')
 
-    if not store_id:
-        return jsonify({"success": False, "message": "Store ID is required"}), 400
+    if not (floorplan_id and store_id and floorplan_description and layout_image and dimensions):
+        return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        delete_store(user, password, store_id)
+        update_floorplan(user, password, floorplan_id, store_id, floorplan_description, layout_image, dimensions)
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    return jsonify({"success": True}), 200
+
+# Route to delete a floorplan
+@floorplan_bp.route('/dsfloorplan/delete_floorplan', methods=['POST'])
+def delete_floorplan_route():
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return jsonify({"success": False, "message": "Missing credentials"}), 401
+
+    data = request.get_json()
+    floorplan_id = data.get('floorplanId')
+
+    if not floorplan_id:
+        return jsonify({"success": False, "message": "Floorplan ID is required"}), 400
+
+    try:
+        delete_floorplan(user, password, floorplan_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
