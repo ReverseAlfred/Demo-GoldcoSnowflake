@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DS FloorPlan</title>
+    <title>DS Floor Plans</title>
     <!-- Link to external CSS stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dsfloorplan.css') }}">
 </head>
@@ -12,7 +12,7 @@
 <body>
     <!-- Header section -->
     <div class="header">
-        <h1>FloorPlan Management</h1>
+        <h1>Floor Plan Management</h1>
     </div>
 
     <!-- Main container for layout -->
@@ -22,7 +22,7 @@
             <button id="dashboardButton">Dashboard</button>
             <button id="clusterButton">Cluster</button>
             <button id="storesButton">Stores</button>
-            <button id="floorPlansButton">FloorPlans</button>
+            <button id="floorPlansButton">Floor Plans</button>
             <button id="planogramsButton">Planograms</button>
             <button id="productsButton">Products</button>
             <button id="performanceButton">Performance</button>
@@ -37,14 +37,14 @@
             <!-- Filter and add button -->
             <div class="filter-bar">
                 <input type="text" id="filterInput" placeholder="Search...">
-                <button id="addButton" class="custom-style">Add FloorPlan</button>
+                <button id="addButton" class="custom-style">Add Floor Plan</button>
             </div>
 
-            <!-- Table of floorplans -->
+            <!-- Table of floor plans -->
             <table id="itemsContainer">
                 <thead>
                     <tr>
-                        <th>FloorPlan ID</th>
+                        <th>Floor Plan ID</th>
                         <th>Store ID</th>
                         <th>Description</th>
                         <th>Layout Image</th>
@@ -53,16 +53,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for floorplan in floorplans %}
+                    {% for floor_plan in floor_plans %}
                     <tr class="item">
-                        <td>{{ floorplan[0] }}</td>
-                        <td>{{ floorplan[1] }}</td>
-                        <td>{{ floorplan[2] }}</td>
-                        <td>{{ floorplan[3] }}</td>
-                        <td>{{ floorplan[4] }}</td>
+                        <td>{{ floor_plan[0] }}</td>
+                        <td>{{ floor_plan[1] }}</td>
+                        <td>{{ floor_plan[2] }}</td>
+                        <td><img src="{{ floor_plan[3] }}" alt="Layout Image" class="layout-image"></td>
+                        <td>{{ floor_plan[4] }}</td>
                         <td>
-                            <button class="edit-button custom-style" data-id="{{ floorplan[0] }}">Edit</button>
-                            <button class="delete-button custom-style" data-id="{{ floorplan[0] }}">Delete</button>
+                            <button class="edit-button custom-style" data-id="{{ floor_plan[0] }}">Edit</button>
+                            <button class="delete-button custom-style" data-id="{{ floor_plan[0] }}">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -74,15 +74,15 @@
     <!-- Floating Form -->
     <div id="floatingFormContainer" class="floating-form-container">
         <div class="floating-form">
-            <h2 id="formTitle">Add FloorPlan</h2>
-            <form id="floorplanForm">
+            <h2 id="formTitle">Add Floor Plan</h2>
+            <form id="floorPlanForm">
                 <label for="storeId">Store ID</label>
                 <input type="number" id="storeId" name="storeId">
 
-                <label for="floorplanDescription">Description</label>
-                <input type="text" id="floorplanDescription" name="floorplanDescription">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description">
 
-                <label for="layoutImage">Layout Image</label>
+                <label for="layoutImage">Layout Image URL</label>
                 <input type="text" id="layoutImage" name="layoutImage">
 
                 <label for="dimensions">Dimensions</label>
@@ -96,7 +96,7 @@
 
     <!-- Delete Confirmation -->
     <div id="deleteConfirmation" class="delete-confirmation">
-        <p>Are you sure you want to delete this floorplan?</p>
+        <p>Are you sure you want to delete this floor plan?</p>
         <button id="confirmDelete" class="custom-style">Yes</button>
         <button id="cancelDelete" class="custom-style">No</button>
     </div>

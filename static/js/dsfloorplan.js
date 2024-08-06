@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const floorplanForm = document.getElementById('floorplanForm');
+    const floorPlanForm = document.getElementById('floorPlanForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
     const cancelDeleteButton = document.getElementById('cancelDelete');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentItemId = null;
 
     // Ensure elements are present
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !floorplanForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !floorPlanForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Cluster': '/dscluster',
         'Stores': '/dsstore',
         'Products': '/dsproduct',
-        'FloorPlans': '/dsfloorplan',
+        'Floor Plans': '/dsfloorplan',
         'Planograms': '/dsplanogram',
         'Performance': '/dsperformance',
         'Positions': '/dsposition'
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching floorplan data:', error);
-            showMessage('error', 'Failed to load floorplan data.');
+            console.error('Error fetching floor plan data:', error);
+            showMessage('error', 'Failed to load floor plan data.');
         }
     }
 
@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Show floating form
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add FloorPlan';
-        floorplanForm.reset();
+        document.getElementById('formTitle').textContent = 'Add Floor Plan';
+        floorPlanForm.reset();
         currentItemId = null;
         floatingFormContainer.style.display = 'flex';
     });
@@ -79,26 +79,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save floorplan (Add/Edit)
-    floorplanForm.addEventListener('submit', async (event) => {
+    // Save floor plan (Add/Edit)
+    floorPlanForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         // Form validation
-        if (!floorplanForm.checkValidity()) {
+        if (!floorPlanForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(floorplanForm);
+        const formData = new FormData(floorPlanForm);
         const data = {
             floorPlanId: currentItemId,
             storeId: formData.get('storeId'),
-            floorplanDescription: formData.get('floorplanDescription'),
+            description: formData.get('description'),
             layoutImage: formData.get('layoutImage'),
             dimensions: formData.get('dimensions')
         };
 
-        const url = currentItemId ? `/dsfloorplan/update_floorplan` : '/dsfloorplan/add';
+        const url = currentItemId ? `/dsfloorplan/update_floor_plan` : '/dsfloorplan/add';
 
         try {
             const response = await fetch(url, {
@@ -112,11 +112,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentItemId ? 'FloorPlan updated successfully.' : 'FloorPlan added successfully.');
+                showMessage('success', currentItemId ? 'Floor plan updated successfully.' : 'Floor plan added successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save floorplan.');
+                throw new Error(result.message || 'Failed to save floor plan.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -127,12 +127,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
             currentItemId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit FloorPlan';
+            document.getElementById('formTitle').textContent = 'Edit Floor Plan';
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
             document.getElementById('storeId').value = fields[1].textContent;
-            document.getElementById('floorplanDescription').value = fields[2].textContent;
+            document.getElementById('description').value = fields[2].textContent;
             document.getElementById('layoutImage').value = fields[3].textContent;
             document.getElementById('dimensions').value = fields[4].textContent;
             floatingFormContainer.style.display = 'flex';
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsfloorplan/delete_floorplan`, {
+            const response = await fetch(`/dsfloorplan/delete_floor_plan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -158,11 +158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', 'FloorPlan deleted successfully.');
+                showMessage('success', 'Floor plan deleted successfully.');
                 await fetchItems(); // Reload items or update the DOM as needed
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete floorplan.');
+                throw new Error(result.message || 'Failed to delete floor plan.');
             }
         } catch (error) {
             showMessage('error', error.message);
