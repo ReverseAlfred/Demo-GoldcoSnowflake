@@ -47,10 +47,7 @@
                         <th>UPC</th>
                         <th>Product Name</th>
                         <th>Category</th>
-                        <th>Brand</th>
-                        <th>Price</th>
-                        <th>Description</th>
-                        <th>SKU</th>
+                        <th>Subcategory</th>
                         <th>Dimensions</th>
                         <th>Weight</th>
                         <th>Actions</th>
@@ -59,15 +56,12 @@
                 <tbody>
                     {% for product in products %}
                     <tr class="item">
-                        <td>{{ product[0] }}</td>
                         <td>{{ product[1] }}</td>
                         <td>{{ product[2] }}</td>
                         <td>{{ product[3] }}</td>
-                        <td>${{ product[4] }}</td>
+                        <td>{{ product[4] }}</td>
                         <td>{{ product[5] }}</td>
                         <td>{{ product[6] }}</td>
-                        <td>{{ product[7] }}</td>
-                        <td>{{ product[8] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ product[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ product[0] }}">Delete</button>
@@ -93,17 +87,8 @@
                 <label for="category">Category</label>
                 <input type="text" id="category" name="category" required>
 
-                <label for="brand">Brand</label>
-                <input type="text" id="brand" name="brand" required>
-
-                <label for="price">Price</label>
-                <input type="text" id="price" name="price" required>
-
-                <label for="description">Description</label>
-                <input type="text" id="description" name="description" required>
-
-                <label for="sku">SKU</label>
-                <input type="text" id="sku" name="sku" required>
+                <label for="subcategory">Subcategory</label>
+                <input type="text" id="subcategory" name="subcategory">
 
                 <label for="dimensions">Dimensions</label>
                 <input type="text" id="dimensions" name="dimensions" required>

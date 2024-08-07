@@ -22,7 +22,10 @@ def fetch_products(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM PRODUCTS")
+        cursor.execute("""
+            SELECT DBKEY, UPC, PRODUCTNAME, CATEGORY, SUBCATEGORY, DIMENSIONS, WEIGHT
+            FROM NEWCKB.PUBLIC.ITX_SPC_PRODUCT
+        """)
         return cursor.fetchall()
     except Exception as e:
         raise e
@@ -36,7 +39,11 @@ def fetch_product_by_upc(user, password, upc):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT FROM PRODUCTS WHERE UPC = %s", (upc,))
+        cursor.execute("""
+            SELECT DBKEY, UPC, PRODUCTNAME, CATEGORY, SUBCATEGORY, DIMENSIONS, WEIGHT
+            FROM NEWCKB.PUBLIC.ITX_SPC_PRODUCT
+            WHERE UPC = %s
+        """, (upc,))
         return cursor.fetchone()
     except Exception as e:
         raise e
@@ -45,15 +52,15 @@ def fetch_product_by_upc(user, password, upc):
             conn.close()
 
 # Insert a new product
-def insert_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight):
+def insert_product(user, password, upc, product_name, category, subcategory, dimensions, weight):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO PRODUCTS (UPC, PRODUCTNAME, CATEGORY, BRAND, PRICE, DESCRIPTION, SKU, DIMENSIONS, WEIGHT) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (upc, product_name, category, brand, price, description, sku, dimensions, weight))
+            INSERT INTO NEWCKB.PUBLIC.ITX_SPC_PRODUCT (UPC, PRODUCTNAME, CATEGORY, SUBCATEGORY, DIMENSIONS, WEIGHT) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (upc, product_name, category, subcategory, dimensions, weight))
         conn.commit()
         print(f"Inserted product UPC: {upc}")
     except Exception as e:
@@ -63,16 +70,16 @@ def insert_product(user, password, upc, product_name, category, brand, price, de
             conn.close()
 
 # Update an existing product
-def update_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight):
+def update_product(user, password, upc, product_name, category, subcategory, dimensions, weight):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE PRODUCTS
-            SET PRODUCTNAME = %s, CATEGORY = %s, BRAND = %s, PRICE = %s, DESCRIPTION = %s, SKU = %s, DIMENSIONS = %s, WEIGHT = %s
+            UPDATE NEWCKB.PUBLIC.ITX_SPC_PRODUCT
+            SET PRODUCTNAME = %s, CATEGORY = %s, SUBCATEGORY = %s, DIMENSIONS = %s, WEIGHT = %s
             WHERE UPC = %s
-        """, (product_name, category, brand, price, description, sku, dimensions, weight, upc))
+        """, (product_name, category, subcategory, dimensions, weight, upc))
         conn.commit()
         print(f"Updated product UPC: {upc}")
     except Exception as e:
@@ -87,7 +94,10 @@ def delete_product(user, password, upc):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM PRODUCTS WHERE UPC = %s", (upc,))
+        cursor.execute("""
+            DELETE FROM NEWCKB.PUBLIC.ITX_SPC_PRODUCT
+            WHERE UPC = %s
+        """, (upc,))
         conn.commit()
         print(f"Deleted product UPC: {upc}")
     except Exception as e:
@@ -134,15 +144,13 @@ def get_product():
         return jsonify({
             "success": True,
             "product": {
-                "upc": product[0],
-                "productName": product[1],
-                "category": product[2],
-                "brand": product[3],
-                "price": product[4],
-                "description": product[5],
-                "sku": product[6],
-                "dimensions": product[7],
-                "weight": product[8]
+                "dbkey": product[0],
+                "upc": product[1],
+                "productName": product[2],
+                "category": product[3],
+                "subcategory": product[4],
+                "dimensions": product[5],
+                "weight": product[6]
             }
         })
     else:
@@ -161,18 +169,15 @@ def add_product():
     upc = data.get('upc')
     product_name = data.get('productName')
     category = data.get('category')
-    brand = data.get('brand')
-    price = data.get('price')
-    description = data.get('description')
-    sku = data.get('sku')
+    subcategory = data.get('subcategory')
     dimensions = data.get('dimensions')
     weight = data.get('weight')
     
-    if not (upc and product_name and category and brand and price and description and sku and dimensions and weight):
+    if not (upc and product_name and category and subcategory and dimensions and weight):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight)
+        insert_product(user, password, upc, product_name, category, subcategory, dimensions, weight)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -191,18 +196,15 @@ def update_product_route():
     upc = data.get('upc')
     product_name = data.get('productName')
     category = data.get('category')
-    brand = data.get('brand')
-    price = data.get('price')
-    description = data.get('description')
-    sku = data.get('sku')
+    subcategory = data.get('subcategory')
     dimensions = data.get('dimensions')
     weight = data.get('weight')
 
-    if not (upc and product_name and category and brand and price and description and sku and dimensions and weight):
+    if not (upc and product_name and category and subcategory and dimensions and weight):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_product(user, password, upc, product_name, category, brand, price, description, sku, dimensions, weight)
+        update_product(user, password, upc, product_name, category, subcategory, dimensions, weight)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

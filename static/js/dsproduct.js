@@ -93,13 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const formData = new FormData(productForm);
         const data = {
-            upc: currentProductId,
+            upc: formData.get('upc'),
             productName: formData.get('productName'),
             category: formData.get('category'),
-            brand: formData.get('brand'),
-            price: formData.get('price'),
-            description: formData.get('description'),
-            sku: formData.get('sku'),
+            subcategory: formData.get('subcategory'),
             dimensions: formData.get('dimensions'),
             weight: formData.get('weight')
         };
@@ -137,14 +134,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
+            document.getElementById('upc').value = fields[0].textContent;
             document.getElementById('productName').value = fields[1].textContent;
             document.getElementById('category').value = fields[2].textContent;
-            document.getElementById('brand').value = fields[3].textContent;
-            document.getElementById('price').value = fields[4].textContent;
-            document.getElementById('description').value = fields[5].textContent;
-            document.getElementById('sku').value = fields[6].textContent;
-            document.getElementById('dimensions').value = fields[7].textContent;
-            document.getElementById('weight').value = fields[8].textContent;
+            document.getElementById('subcategory').value = fields[3].textContent;
+            document.getElementById('dimensions').value = fields[4].textContent;
+            document.getElementById('weight').value = fields[5].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
