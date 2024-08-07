@@ -11,13 +11,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let currentItemId = null;
 
-    // Ensure elements are present
     if (!filterInput || !itemsContainer || !floatingFormContainer || !storeForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
 
-    // Sidebar navigation
     const sidebarButtons = {
         'Dashboard': '/dashboard',
         'Cluster': '/dscluster',
@@ -39,7 +37,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Fetch and populate items
     async function fetchItems() {
         try {
             const response = await fetch('/dsstore');
@@ -56,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchItems();
 
-    // Filter items
     filterInput.addEventListener('input', () => {
         const filterText = filterInput.value.toLowerCase();
         const items = itemsContainer.querySelectorAll('.item');
@@ -66,7 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Show floating form
     addButton.addEventListener('click', () => {
         document.getElementById('formTitle').textContent = 'Add Store';
         storeForm.reset();
@@ -74,16 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'flex';
     });
 
-    // Cancel floating form
     document.getElementById('cancelButton').addEventListener('click', () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save store (Add/Edit)
     storeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Form validation
         if (!storeForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
@@ -93,11 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = {
             storeId: currentItemId,
             storeName: formData.get('storeName'),
-            location: formData.get('location'),
-            size: formData.get('size'),
-            manager: formData.get('manager'),
-            contactInfo: formData.get('contactInfo'),
-            clusterId: formData.get('clusterId') // Added Cluster ID
+            descriptivo1: formData.get('descriptivo1'),
+            dbStatus: formData.get('dbStatus')
         };
 
         const url = currentItemId ? `/dsstore/update_store` : '/dsstore/add';
@@ -115,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 showMessage('success', currentItemId ? 'Store updated successfully.' : 'Store added successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                await fetchItems();
                 floatingFormContainer.style.display = 'none';
             } else {
                 throw new Error(result.message || 'Failed to save store.');
@@ -125,20 +114,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
             currentItemId = event.target.getAttribute('data-id');
             document.getElementById('formTitle').textContent = 'Edit Store';
-            // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
             document.getElementById('storeName').value = fields[1].textContent;
-            document.getElementById('location').value = fields[2].textContent;
-            document.getElementById('size').value = fields[3].textContent;
-            document.getElementById('manager').value = fields[4].textContent;
-            document.getElementById('contactInfo').value = fields[5].textContent;
-            document.getElementById('clusterId').value = fields[6].textContent; // Added Cluster ID
+            document.getElementById('descriptivo1').value = fields[2].textContent;
+            document.getElementById('dbStatus').value = fields[3].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
@@ -148,7 +132,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Confirm delete
     confirmDeleteButton.addEventListener('click', async () => {
         try {
             const response = await fetch(`/dsstore/delete_store`, {
@@ -163,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 showMessage('success', 'Store deleted successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                await fetchItems();
                 deleteConfirmation.style.display = 'none';
             } else {
                 throw new Error(result.message || 'Failed to delete store.');
@@ -173,18 +156,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Cancel delete
     cancelDeleteButton.addEventListener('click', () => {
         deleteConfirmation.style.display = 'none';
     });
 
-    // Show message
     function showMessage(type, message) {
         floatingMessage.textContent = message;
         floatingMessage.className = `floating-message ${type} show`;
-        floatingMessage.style.display = 'block'; // Ensure it's visible
+        floatingMessage.style.display = 'block';
         setTimeout(() => {
-            floatingMessage.style.display = 'none'; // Hide after timeout
+            floatingMessage.style.display = 'none';
         }, 3000);
     }
 });
