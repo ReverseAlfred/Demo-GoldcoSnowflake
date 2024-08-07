@@ -45,12 +45,9 @@
                 <thead>
                     <tr>
                         <th>Planogram ID</th>
-                        <th>Store ID</th>
-                        <th>Floor Plan ID</th>
-                        <th>Description</th>
-                        <th>Image</th>
-                        <th>Effective Date</th>
+                        <th>Planogram Name</th>
                         <th>PDF Path</th>
+                        <th>DB Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -59,11 +56,8 @@
                     <tr class="item">
                         <td>{{ planogram[0] }}</td>
                         <td>{{ planogram[1] }}</td>
-                        <td>{{ planogram[2] }}</td>
+                        <td><a href="{{ planogram[2] }}" target="_blank">View PDF</a></td>
                         <td>{{ planogram[3] }}</td>
-                        <td><img src="{{ planogram[4] }}" alt="Planogram Image" width="100"></td>
-                        <td>{{ planogram[5] }}</td>
-                        <td><a href="{{ planogram[6] }}" target="_blank">View PDF</a></td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ planogram[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ planogram[0] }}">Delete</button>
@@ -80,20 +74,8 @@
         <div class="floating-form">
             <h2 id="formTitle">Add Planogram</h2>
             <form id="planogramForm">
-                <label for="storeId">Store ID</label>
-                <input type="number" id="storeId" name="storeId">
-
-                <label for="floorPlanId">Floor Plan ID</label>
-                <input type="number" id="floorPlanId" name="floorPlanId">
-
-                <label for="description">Description</label>
-                <input type="text" id="description" name="description">
-
-                <label for="image">Image URL</label>
-                <input type="text" id="image" name="image">
-
-                <label for="effectiveDate">Effective Date</label>
-                <input type="date" id="effectiveDate" name="effectiveDate">
+                <label for="planogramName">Planogram Name</label>
+                <input type="text" id="planogramName" name="planogramName">
 
                 <label for="pdfPath">PDF Path</label>
                 <input type="text" id="pdfPath" name="pdfPath">

@@ -23,8 +23,8 @@ def fetch_planograms(user, password):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT PlanogramID, StoreID, FloorPlanID, PlanogramDescription, PlanogramImage, EffectiveDate, PDFPath 
-            FROM Planograms
+            SELECT DBKEY, PLANOGRAMNAME, PDFPATH, DBSTATUS 
+            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -40,9 +40,9 @@ def fetch_planogram_by_id(user, password, planogram_id):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT PlanogramID, StoreID, FloorPlanID, PlanogramDescription, PlanogramImage, EffectiveDate, PDFPath 
-            FROM Planograms 
-            WHERE PlanogramID = %s
+            SELECT DBKEY, PLANOGRAMNAME, PDFPATH, DBSTATUS 
+            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM 
+            WHERE DBKEY = %s
         """, (planogram_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -57,7 +57,7 @@ def fetch_max_planogram_id(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(PlanogramID) FROM Planograms")
+        cursor.execute("SELECT MAX(DBKEY) FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM")
         result = cursor.fetchone()
         return result[0] if result[0] is not None else 0
     except Exception as e:
@@ -67,15 +67,15 @@ def fetch_max_planogram_id(user, password):
             conn.close()
 
 # Insert a new planogram
-def insert_planogram(user, password, store_id, floor_plan_id, description, image, effective_date, pdf_path):
+def insert_planogram(user, password, planogram_name, pdf_path):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Planograms (StoreID, FloorPlanID, PlanogramDescription, PlanogramImage, EffectiveDate, PDFPath) 
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (store_id, floor_plan_id, description, image, effective_date, pdf_path))
+            INSERT INTO NEWCKB.PUBLIC.IX_SPC_PLANOGRAM (PLANOGRAMNAME, PDFPATH) 
+            VALUES (%s, %s)
+        """, (planogram_name, pdf_path))
         conn.commit()
         print(f"Inserted planogram")
     except Exception as e:
@@ -85,16 +85,16 @@ def insert_planogram(user, password, store_id, floor_plan_id, description, image
             conn.close()
 
 # Update an existing planogram
-def update_planogram(user, password, planogram_id, store_id, floor_plan_id, description, image, effective_date, pdf_path):
+def update_planogram(user, password, planogram_id, planogram_name, pdf_path, db_status):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE Planograms
-            SET StoreID = %s, FloorPlanID = %s, PlanogramDescription = %s, PlanogramImage = %s, EffectiveDate = %s, PDFPath = %s
-            WHERE PlanogramID = %s
-        """, (store_id, floor_plan_id, description, image, effective_date, pdf_path, planogram_id))
+            UPDATE NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
+            SET PLANOGRAMNAME = %s, PDFPATH = %s, DBSTATUS = %s
+            WHERE DBKEY = %s
+        """, (planogram_name, pdf_path, db_status, planogram_id))
         conn.commit()
         print(f"Updated planogram ID: {planogram_id}")
     except Exception as e:
@@ -109,7 +109,7 @@ def delete_planogram(user, password, planogram_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM Planograms WHERE PlanogramID = %s", (planogram_id,))
+        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM WHERE DBKEY = %s", (planogram_id,))
         conn.commit()
         print(f"Deleted planogram ID: {planogram_id}")
     except Exception as e:
@@ -157,12 +157,9 @@ def get_planogram():
             "success": True,
             "planogram": {
                 "planogramId": planogram[0],
-                "storeId": planogram[1],
-                "floorPlanId": planogram[2],
-                "description": planogram[3],
-                "image": planogram[4],
-                "effectiveDate": planogram[5],
-                "pdfPath": planogram[6]
+                "planogramName": planogram[1],
+                "pdfPath": planogram[2],
+                "dbStatus": planogram[3]
             }
         })
     else:
@@ -178,18 +175,14 @@ def add_planogram():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    store_id = data.get('storeId')
-    floor_plan_id = data.get('floorPlanId')
-    description = data.get('description')
-    image = data.get('image')
-    effective_date = data.get('effectiveDate')
+    planogram_name = data.get('planogramName')
     pdf_path = data.get('pdfPath')
     
-    if not (store_id and floor_plan_id and description and image and effective_date and pdf_path):
+    if not (planogram_name and pdf_path):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_planogram(user, password, store_id, floor_plan_id, description, image, effective_date, pdf_path)
+        insert_planogram(user, password, planogram_name, pdf_path)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -206,18 +199,15 @@ def update_planogram_route():
 
     data = request.get_json()
     planogram_id = data.get('planogramId')
-    store_id = data.get('storeId')
-    floor_plan_id = data.get('floorPlanId')
-    description = data.get('description')
-    image = data.get('image')
-    effective_date = data.get('effectiveDate')
+    planogram_name = data.get('planogramName')
     pdf_path = data.get('pdfPath')
+    db_status = data.get('dbStatus')
 
-    if not (planogram_id and store_id and floor_plan_id and description and image and effective_date and pdf_path):
+    if not (planogram_id and planogram_name and pdf_path and db_status is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_planogram(user, password, planogram_id, store_id, floor_plan_id, description, image, effective_date, pdf_path)
+        update_planogram(user, password, planogram_id, planogram_name, pdf_path, db_status)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

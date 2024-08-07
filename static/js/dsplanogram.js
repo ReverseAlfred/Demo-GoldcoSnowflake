@@ -92,11 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(planogramForm);
         const data = {
             planogramId: currentItemId,
-            storeId: formData.get('storeId'),
-            floorPlanId: formData.get('floorPlanId'),
-            description: formData.get('description'),
-            image: formData.get('image'),
-            effectiveDate: formData.get('effectiveDate'),
+            planogramName: formData.get('planogramName'),
             pdfPath: formData.get('pdfPath')
         };
 
@@ -133,12 +129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('storeId').value = fields[1].textContent;
-            document.getElementById('floorPlanId').value = fields[2].textContent;
-            document.getElementById('description').value = fields[3].textContent;
-            document.getElementById('image').value = fields[4].textContent;
-            document.getElementById('effectiveDate').value = fields[5].textContent;
-            document.getElementById('pdfPath').value = fields[6].textContent;
+            document.getElementById('planogramName').value = fields[1].textContent;
+            document.getElementById('pdfPath').value = fields[2].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
