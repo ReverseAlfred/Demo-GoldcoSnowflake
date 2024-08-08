@@ -92,10 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(floorPlanForm);
         const data = {
             floorPlanId: currentItemId,
-            storeId: formData.get('storeId'),
-            description: formData.get('description'),
-            layoutImage: formData.get('layoutImage'),
-            dimensions: formData.get('dimensions')
+            floorPlanName: formData.get('floorPlanName'),
+            dbStatus: formData.get('dbStatus')
         };
 
         const url = currentItemId ? `/dsfloorplan/update_floor_plan` : '/dsfloorplan/add';
@@ -131,10 +129,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('storeId').value = fields[1].textContent;
-            document.getElementById('description').value = fields[2].textContent;
-            document.getElementById('layoutImage').value = fields[3].textContent;
-            document.getElementById('dimensions').value = fields[4].textContent;
+            document.getElementById('floorPlanName').value = fields[1].textContent;
+            document.getElementById('dbStatus').value = fields[2].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 

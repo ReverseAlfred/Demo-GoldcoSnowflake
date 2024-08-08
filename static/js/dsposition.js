@@ -92,13 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(positionForm);
         const data = {
             positionId: currentItemId,
-            planogramId: formData.get('planogramId'),
-            upc: formData.get('upc'),
-            xCoordinate: formData.get('xCoordinate'),
-            yCoordinate: formData.get('yCoordinate'),
-            zCoordinate: formData.get('zCoordinate'),
-            facing: formData.get('facing'),
-            shelfLevel: formData.get('shelfLevel')
+            dbProductParentKey: formData.get('dbProductParentKey'),
+            dbPlanogramParentKey: formData.get('dbPlanogramParentKey'),
+            dbFixtureParentKey: formData.get('dbFixtureParentKey'),
+            hFacing: formData.get('hFacing'),
+            vFacing: formData.get('vFacing'),
+            dFacing: formData.get('dFacing')
         };
 
         const url = currentItemId ? `/dsposition/update_position` : '/dsposition/add';
@@ -134,13 +133,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('planogramId').value = fields[1].textContent;
-            document.getElementById('upc').value = fields[2].textContent;
-            document.getElementById('xCoordinate').value = fields[3].textContent;
-            document.getElementById('yCoordinate').value = fields[4].textContent;
-            document.getElementById('zCoordinate').value = fields[5].textContent;
-            document.getElementById('facing').value = fields[6].textContent;
-            document.getElementById('shelfLevel').value = fields[7].textContent;
+            document.getElementById('dbProductParentKey').value = fields[1].textContent;
+            document.getElementById('dbPlanogramParentKey').value = fields[2].textContent;
+            document.getElementById('dbFixtureParentKey').value = fields[3].textContent;
+            document.getElementById('hFacing').value = fields[4].textContent;
+            document.getElementById('vFacing').value = fields[5].textContent;
+            document.getElementById('dFacing').value = fields[6].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 

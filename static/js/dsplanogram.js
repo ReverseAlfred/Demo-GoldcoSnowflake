@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelDeleteButton = document.getElementById('cancelDelete');
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const addButton = document.getElementById('addButton');
-    
+
     let currentItemId = null;
 
-    // Ensure elements are present
+    // Check if required elements are available
     if (!filterInput || !itemsContainer || !floatingFormContainer || !planogramForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Fetch and populate items
+    // Fetch and display items
     async function fetchItems() {
         try {
             const response = await fetch('/dsplanogram');
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await fetchItems();
 
-    // Filter items
+    // Filter items based on search input
     filterInput.addEventListener('input', () => {
         const filterText = filterInput.value.toLowerCase();
         const items = itemsContainer.querySelectorAll('.item');
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Show floating form
+    // Show form for adding new planogram record
     addButton.addEventListener('click', () => {
         document.getElementById('formTitle').textContent = 'Add Planogram';
         planogramForm.reset();
@@ -74,16 +74,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'flex';
     });
 
-    // Cancel floating form
+    // Cancel form and close the floating form container
     document.getElementById('cancelButton').addEventListener('click', () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Save planogram (Add/Edit)
+    // Handle form submission for add/update
     planogramForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Form validation
         if (!planogramForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
@@ -93,7 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = {
             planogramId: currentItemId,
             planogramName: formData.get('planogramName'),
-            pdfPath: formData.get('pdfPath')
+            pdfPath: formData.get('pdfPath'),
+            dbStatus: formData.get('dbStatus')
         };
 
         const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 showMessage('success', currentItemId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                await fetchItems();
                 floatingFormContainer.style.display = 'none';
             } else {
                 throw new Error(result.message || 'Failed to save planogram.');
@@ -121,16 +121,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Edit button click
+    // Handle edit and delete button clicks
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
             currentItemId = event.target.getAttribute('data-id');
             document.getElementById('formTitle').textContent = 'Edit Planogram';
-            // Populate form with current item details
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
             document.getElementById('planogramName').value = fields[1].textContent;
             document.getElementById('pdfPath').value = fields[2].textContent;
+            document.getElementById('dbStatus').value = fields[3].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Confirm delete
+    // Confirm delete action
     confirmDeleteButton.addEventListener('click', async () => {
         try {
             const response = await fetch(`/dsplanogram/delete_planogram`, {
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (response.ok) {
                 showMessage('success', 'Planogram deleted successfully.');
-                await fetchItems(); // Reload items or update the DOM as needed
+                await fetchItems();
                 deleteConfirmation.style.display = 'none';
             } else {
                 throw new Error(result.message || 'Failed to delete planogram.');
@@ -165,18 +165,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Cancel delete
+    // Cancel delete action
     cancelDeleteButton.addEventListener('click', () => {
         deleteConfirmation.style.display = 'none';
     });
 
-    // Show message
+    // Display message function
     function showMessage(type, message) {
         floatingMessage.textContent = message;
         floatingMessage.className = `floating-message ${type} show`;
-        floatingMessage.style.display = 'block'; // Ensure it's visible
+        floatingMessage.style.display = 'block';
         setTimeout(() => {
-            floatingMessage.style.display = 'none'; // Hide after timeout
+            floatingMessage.style.display = 'none';
         }, 3000);
     }
 });

@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify
 import snowflake.connector
 from config import Config
+from datetime import datetime
 
 performance_bp = Blueprint('performance', __name__)
 
@@ -23,8 +24,8 @@ def fetch_performances(user, password):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT PERFORMANCEID, POSITIONID, SALESVOLUME, SALESREVENUE, STOCKLEVEL, RESTOCKFREQUENCY, DATE
-            FROM PERFORMANCE
+            SELECT DBKEY, DBPLANOGRAMPARENTKEY, DBPRODUCTPARENTKEY, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST
+            FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -40,9 +41,9 @@ def fetch_performance_by_id(user, password, performance_id):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT PERFORMANCEID, POSITIONID, SALESVOLUME, SALESREVENUE, STOCKLEVEL, RESTOCKFREQUENCY, DATE
-            FROM PERFORMANCE
-            WHERE PERFORMANCEID = %s
+            SELECT DBKEY, DBPLANOGRAMPARENTKEY, DBPRODUCTPARENTKEY, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST
+            FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE
+            WHERE DBKEY = %s
         """, (performance_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -52,15 +53,15 @@ def fetch_performance_by_id(user, password, performance_id):
             conn.close()
 
 # Insert a new performance record
-def insert_performance(user, password, position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date):
+def insert_performance(user, password, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO PERFORMANCE (POSITIONID, SALESVOLUME, SALESREVENUE, STOCKLEVEL, RESTOCKFREQUENCY, DATE)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date))
+            INSERT INTO NEWCKB.PUBLIC.IX_SPC_PERFORMANCE (DBPLANOGRAMPARENTKEY, DBPRODUCTPARENTKEY, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost))
         conn.commit()
         print(f"Inserted performance record")
     except Exception as e:
@@ -70,18 +71,18 @@ def insert_performance(user, password, position_id, sales_volume, sales_revenue,
             conn.close()
 
 # Update an existing performance record
-def update_performance(user, password, performance_id, position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date):
+def update_performance(user, password, dbkey, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE PERFORMANCE
-            SET POSITIONID = %s, SALESVOLUME = %s, SALESREVENUE = %s, STOCKLEVEL = %s, RESTOCKFREQUENCY = %s, DATE = %s
-            WHERE PERFORMANCEID = %s
-        """, (position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date, performance_id))
+            UPDATE NEWCKB.PUBLIC.IX_SPC_PERFORMANCE
+            SET DBPLANOGRAMPARENTKEY = %s, DBPRODUCTPARENTKEY = %s, FACTINGS = %s, CAPACITY = %s, UNITMOVEMENT = %s, SALES = %s, MARGEN = %s, COST = %s
+            WHERE DBKEY = %s
+        """, (dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost, dbkey))
         conn.commit()
-        print(f"Updated performance record ID: {performance_id}")
+        print(f"Updated performance record ID: {dbkey}")
     except Exception as e:
         raise e
     finally:
@@ -94,7 +95,7 @@ def delete_performance(user, password, performance_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM PERFORMANCE WHERE PERFORMANCEID = %s", (performance_id,))
+        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE WHERE DBKEY = %s", (performance_id,))
         conn.commit()
         print(f"Deleted performance record ID: {performance_id}")
     except Exception as e:
@@ -141,13 +142,15 @@ def get_performance():
         return jsonify({
             "success": True,
             "performance": {
-                "performanceId": performance[0],
-                "positionId": performance[1],
-                "salesVolume": performance[2],
-                "salesRevenue": performance[3],
-                "stockLevel": performance[4],
-                "restockFrequency": performance[5],
-                "date": performance[6].strftime('%Y-%m-%d') if performance[6] else None
+                "dbKey": performance[0],
+                "dbPlanogramParentKey": performance[1],
+                "dbProductParentKey": performance[2],
+                "factings": performance[3],
+                "capacity": performance[4],
+                "unitMovement": performance[5],
+                "sales": performance[6],
+                "margen": performance[7],
+                "cost": performance[8]
             }
         })
     else:
@@ -163,18 +166,20 @@ def add_performance():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    position_id = data.get('positionId')
-    sales_volume = data.get('salesVolume')
-    sales_revenue = data.get('salesRevenue')
-    stock_level = data.get('stockLevel')
-    restock_frequency = data.get('restockFrequency')
-    date = data.get('date')  # Expected to be in 'YYYY-MM-DD' format
+    dbplanogramparentkey = data.get('dbPlanogramParentKey')
+    dbproductparentkey = data.get('dbProductParentKey')
+    factings = data.get('factings')
+    capacity = data.get('capacity')
+    unitmovement = data.get('unitMovement')
+    sales = data.get('sales')
+    margen = data.get('margen')
+    cost = data.get('cost')
     
-    if not (position_id and sales_volume and sales_revenue and stock_level and restock_frequency and date):
+    if not (dbplanogramparentkey and dbproductparentkey and factings is not None and capacity is not None and unitmovement is not None and sales is not None and margen is not None and cost is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_performance(user, password, position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date)
+        insert_performance(user, password, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -190,19 +195,21 @@ def update_performance_route():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    performance_id = data.get('performanceId')
-    position_id = data.get('positionId')
-    sales_volume = data.get('salesVolume')
-    sales_revenue = data.get('salesRevenue')
-    stock_level = data.get('stockLevel')
-    restock_frequency = data.get('restockFrequency')
-    date = data.get('date')  # Expected to be in 'YYYY-MM-DD' format
+    dbkey = data.get('dbKey')
+    dbplanogramparentkey = data.get('dbPlanogramParentKey')
+    dbproductparentkey = data.get('dbProductParentKey')
+    factings = data.get('factings')
+    capacity = data.get('capacity')
+    unitmovement = data.get('unitMovement')
+    sales = data.get('sales')
+    margen = data.get('margen')
+    cost = data.get('cost')
 
-    if not (performance_id and position_id and sales_volume and sales_revenue and stock_level and restock_frequency and date):
+    if not (dbkey and dbplanogramparentkey and dbproductparentkey and factings is not None and capacity is not None and unitmovement is not None and sales is not None and margen is not None and cost is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_performance(user, password, performance_id, position_id, sales_volume, sales_revenue, stock_level, restock_frequency, date)
+        update_performance(user, password, dbkey, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -218,8 +225,7 @@ def delete_performance_route():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    performance_id = data.get('performanceId')
-
+    performance_id = data.get('dbKey')
     if not performance_id:
         return jsonify({"success": False, "message": "Performance ID is required"}), 400
 

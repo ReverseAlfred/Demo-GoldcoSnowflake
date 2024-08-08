@@ -23,8 +23,8 @@ def fetch_floor_plans(user, password):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT FloorPlanID, StoreID, FloorPlanDescription, LayoutImage, Dimensions 
-            FROM FloorPlans
+            SELECT DBKEY, FLOORPLANNAME, DBSTATUS 
+            FROM IX_FLR_FLOORPLAN
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -40,9 +40,9 @@ def fetch_floor_plan_by_id(user, password, floor_plan_id):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT FloorPlanID, StoreID, FloorPlanDescription, LayoutImage, Dimensions 
-            FROM FloorPlans 
-            WHERE FloorPlanID = %s
+            SELECT DBKEY, FLOORPLANNAME, DBSTATUS 
+            FROM IX_FLR_FLOORPLAN 
+            WHERE DBKEY = %s
         """, (floor_plan_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -52,17 +52,17 @@ def fetch_floor_plan_by_id(user, password, floor_plan_id):
             conn.close()
 
 # Insert a new floor plan
-def insert_floor_plan(user, password, store_id, description, layout_image, dimensions):
+def insert_floor_plan(user, password, name, status):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO FloorPlans (StoreID, FloorPlanDescription, LayoutImage, Dimensions) 
-            VALUES (%s, %s, %s, %s)
-        """, (store_id, description, layout_image, dimensions))
+            INSERT INTO IX_FLR_FLOORPLAN (FLOORPLANNAME, DBSTATUS) 
+            VALUES (%s, %s)
+        """, (name, status))
         conn.commit()
-        print(f"Inserted floor plan")
+        print(f"Inserted floor plan: {name}")
     except Exception as e:
         raise e
     finally:
@@ -70,16 +70,16 @@ def insert_floor_plan(user, password, store_id, description, layout_image, dimen
             conn.close()
 
 # Update an existing floor plan
-def update_floor_plan(user, password, floor_plan_id, store_id, description, layout_image, dimensions):
+def update_floor_plan(user, password, floor_plan_id, name, status):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE FloorPlans
-            SET StoreID = %s, FloorPlanDescription = %s, LayoutImage = %s, Dimensions = %s
-            WHERE FloorPlanID = %s
-        """, (store_id, description, layout_image, dimensions, floor_plan_id))
+            UPDATE IX_FLR_FLOORPLAN
+            SET FLOORPLANNAME = %s, DBSTATUS = %s
+            WHERE DBKEY = %s
+        """, (name, status, floor_plan_id))
         conn.commit()
         print(f"Updated floor plan ID: {floor_plan_id}")
     except Exception as e:
@@ -94,7 +94,7 @@ def delete_floor_plan(user, password, floor_plan_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM FloorPlans WHERE FloorPlanID = %s", (floor_plan_id,))
+        cursor.execute("DELETE FROM IX_FLR_FLOORPLAN WHERE DBKEY = %s", (floor_plan_id,))
         conn.commit()
         print(f"Deleted floor plan ID: {floor_plan_id}")
     except Exception as e:
@@ -142,10 +142,8 @@ def get_floor_plan():
             "success": True,
             "floorPlan": {
                 "floorPlanId": floor_plan[0],
-                "storeId": floor_plan[1],
-                "description": floor_plan[2],
-                "layoutImage": floor_plan[3],
-                "dimensions": floor_plan[4]
+                "floorPlanName": floor_plan[1],
+                "dbStatus": floor_plan[2]
             }
         })
     else:
@@ -161,16 +159,14 @@ def add_floor_plan():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    store_id = data.get('storeId')
-    description = data.get('description')
-    layout_image = data.get('layoutImage')
-    dimensions = data.get('dimensions')
+    name = data.get('floorPlanName')
+    status = data.get('dbStatus')
     
-    if not (store_id and description and layout_image and dimensions):
+    if not (name and status is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_floor_plan(user, password, store_id, description, layout_image, dimensions)
+        insert_floor_plan(user, password, name, status)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -187,16 +183,14 @@ def update_floor_plan_route():
 
     data = request.get_json()
     floor_plan_id = data.get('floorPlanId')
-    store_id = data.get('storeId')
-    description = data.get('description')
-    layout_image = data.get('layoutImage')
-    dimensions = data.get('dimensions')
+    name = data.get('floorPlanName')
+    status = data.get('dbStatus')
 
-    if not (floor_plan_id and store_id and description and layout_image and dimensions):
+    if not (floor_plan_id and name and status is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_floor_plan(user, password, floor_plan_id, store_id, description, layout_image, dimensions)
+        update_floor_plan(user, password, floor_plan_id, name, status)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

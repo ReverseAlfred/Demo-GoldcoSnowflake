@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelButton = document.getElementById('cancelButton');
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
-    const addButton = document.getElementById('addProductBtn'); // Updated ID
+    const addButton = document.getElementById('addProductBtn');
 
     let currentProductId = null;
 
@@ -98,7 +98,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             category: formData.get('category'),
             subcategory: formData.get('subcategory'),
             dimensions: formData.get('dimensions'),
-            weight: formData.get('weight')
+            weight: formData.get('weight'),
+            dbstatus: formData.get('dbstatus')
         };
 
         const url = currentProductId ? `/dsproduct/update_product` : '/dsproduct/add';
@@ -140,6 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('subcategory').value = fields[3].textContent;
             document.getElementById('dimensions').value = fields[4].textContent;
             document.getElementById('weight').value = fields[5].textContent;
+            document.getElementById('dbstatus').value = fields[6].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 

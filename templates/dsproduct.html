@@ -50,12 +50,14 @@
                         <th>Subcategory</th>
                         <th>Dimensions</th>
                         <th>Weight</th>
+                        <th>DB Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for product in products %}
                     <tr class="item">
+                        <td>{{ product[0] }}</td>
                         <td>{{ product[1] }}</td>
                         <td>{{ product[2] }}</td>
                         <td>{{ product[3] }}</td>
@@ -95,6 +97,9 @@
 
                 <label for="weight">Weight</label>
                 <input type="text" id="weight" name="weight" required>
+
+                <label for="dbstatus">DB Status</label>
+                <input type="number" id="dbstatus" name="dbstatus" required>
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>

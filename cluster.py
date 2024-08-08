@@ -22,7 +22,7 @@ def fetch_clusters(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT CLUSTERID, CLUSTERNAME FROM cluster")
+        cursor.execute("SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER")
         return cursor.fetchall()
     except Exception as e:
         raise e
@@ -36,7 +36,7 @@ def fetch_cluster_by_id(user, password, cluster_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT CLUSTERID, CLUSTERNAME FROM cluster WHERE CLUSTERID = %s", (cluster_id,))
+        cursor.execute("SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s", (cluster_id,))
         return cursor.fetchone()
     except Exception as e:
         raise e
@@ -51,7 +51,7 @@ def insert_cluster(user, password, cluster_name):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO cluster (CLUSTERNAME) 
+            INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER (CLUSTERNAME) 
             VALUES (%s)
         """, (cluster_name,))
         conn.commit()
@@ -69,9 +69,9 @@ def update_cluster(user, password, cluster_id, cluster_name):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE cluster
+            UPDATE NEWCKB.PUBLIC.IX_EIA_CLUSTER
             SET CLUSTERNAME = %s
-            WHERE CLUSTERID = %s
+            WHERE DBKEY = %s
         """, (cluster_name, cluster_id))
         conn.commit()
         print(f"Updated cluster ID: {cluster_id}")
@@ -87,7 +87,7 @@ def delete_cluster(user, password, cluster_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM cluster WHERE CLUSTERID = %s", (cluster_id,))
+        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s", (cluster_id,))
         conn.commit()
         print(f"Deleted cluster ID: {cluster_id}")
     except Exception as e:
@@ -134,7 +134,7 @@ def get_cluster():
         return jsonify({
             "success": True,
             "cluster": {
-                "clusterId": cluster[0],
+                "dbkey": cluster[0],
                 "clusterName": cluster[1]
             }
         })

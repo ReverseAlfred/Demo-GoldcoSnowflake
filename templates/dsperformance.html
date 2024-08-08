@@ -36,13 +36,15 @@
             <table id="itemsContainer">
                 <thead>
                     <tr>
-                        <th>Performance ID</th>
-                        <th>Position ID</th>
-                        <th>Sales Volume</th>
-                        <th>Sales Revenue</th>
-                        <th>Stock Level</th>
-                        <th>Restock Frequency</th>
-                        <th>Date</th>
+                        <th>DB Key</th>
+                        <th>Planogram Parent Key</th>
+                        <th>Product Parent Key</th>
+                        <th>Factings</th>
+                        <th>Capacity</th>
+                        <th>Unit Movement</th>
+                        <th>Sales</th>
+                        <th>Margen</th>
+                        <th>Cost</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -56,6 +58,8 @@
                         <td>{{ performance[4] }}</td>
                         <td>{{ performance[5] }}</td>
                         <td>{{ performance[6] }}</td>
+                        <td>{{ performance[7] }}</td>
+                        <td>{{ performance[8] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ performance[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ performance[0] }}">Delete</button>
@@ -71,25 +75,31 @@
         <div class="floating-form">
             <h2 id="formTitle">Add Performance</h2>
             <form id="performanceForm">
-                <label for="positionId">Position ID</label>
-                <input type="text" id="positionId" name="positionId" required>
+                <label for="dbPlanogramParentKey">Planogram Parent Key</label>
+                <input type="number" id="dbPlanogramParentKey" name="dbPlanogramParentKey" required>
 
-                <label for="salesVolume">Sales Volume</label>
-                <input type="number" id="salesVolume" name="salesVolume" required>
+                <label for="dbProductParentKey">Product Parent Key</label>
+                <input type="number" id="dbProductParentKey" name="dbProductParentKey" required>
 
-                <label for="salesRevenue">Sales Revenue</label>
-                <input type="number" step="0.01" id="salesRevenue" name="salesRevenue" required>
+                <label for="factings">Factings</label>
+                <input type="number" id="factings" name="factings" required>
 
-                <label for="stockLevel">Stock Level</label>
-                <input type="number" id="stockLevel" name="stockLevel" required>
+                <label for="capacity">Capacity</label>
+                <input type="number" id="capacity" name="capacity" required>
 
-                <label for="restockFrequency">Restock Frequency</label>
-                <input type="text" id="restockFrequency" name="restockFrequency" required>
+                <label for="unitMovement">Unit Movement</label>
+                <input type="number" id="unitMovement" name="unitMovement" required>
 
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" required>
+                <label for="sales">Sales</label>
+                <input type="number" step="0.01" id="sales" name="sales" required>
 
-                <input type="hidden" id="performanceId" name="performanceId">
+                <label for="margen">Margen</label>
+                <input type="number" step="0.01" id="margen" name="margen" required>
+
+                <label for="cost">Cost</label>
+                <input type="number" step="0.01" id="cost" name="cost" required>
+
+                <input type="hidden" id="dbKey" name="dbKey">
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>

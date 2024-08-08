@@ -22,7 +22,7 @@
             <button id="dashboardButton">Dashboard</button>
             <button id="clusterButton">Cluster</button>
             <button id="storesButton">Stores</button>
-            <button id="floorPlansButton">Floor Plans</button>
+            <button id="floorPlansButton">FloorPlans</button>
             <button id="planogramsButton">Planograms</button>
             <button id="productsButton">Products</button>
             <button id="performanceButton">Performance</button>
@@ -45,10 +45,8 @@
                 <thead>
                     <tr>
                         <th>Floor Plan ID</th>
-                        <th>Store ID</th>
-                        <th>Description</th>
-                        <th>Layout Image</th>
-                        <th>Dimensions</th>
+                        <th>Floor Plan Name</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -58,8 +56,6 @@
                         <td>{{ floor_plan[0] }}</td>
                         <td>{{ floor_plan[1] }}</td>
                         <td>{{ floor_plan[2] }}</td>
-                        <td><img src="{{ floor_plan[3] }}" alt="Layout Image" class="layout-image"></td>
-                        <td>{{ floor_plan[4] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ floor_plan[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ floor_plan[0] }}">Delete</button>
@@ -76,17 +72,11 @@
         <div class="floating-form">
             <h2 id="formTitle">Add Floor Plan</h2>
             <form id="floorPlanForm">
-                <label for="storeId">Store ID</label>
-                <input type="number" id="storeId" name="storeId">
+                <label for="floorPlanName">Floor Plan Name</label>
+                <input type="text" id="floorPlanName" name="floorPlanName">
 
-                <label for="description">Description</label>
-                <input type="text" id="description" name="description">
-
-                <label for="layoutImage">Layout Image URL</label>
-                <input type="text" id="layoutImage" name="layoutImage">
-
-                <label for="dimensions">Dimensions</label>
-                <input type="text" id="dimensions" name="dimensions">
+                <label for="dbStatus">Status</label>
+                <input type="number" id="dbStatus" name="dbStatus">
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>

@@ -23,8 +23,8 @@ def fetch_positions(user, password):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT POSITIONID, PLANOGRAMID, UPC, XCOORDINATE, YCOORDINATE, ZCOORDINATE, FACING, SHELFLEVEL 
-            FROM POSITIONS
+            SELECT DBKEY, DBPRODUCTPARENTKEY, DBPLANOGRAMPARENTKEY, DBFIXTUREPARENTKEY, HFACING, VFACING, DFACING 
+            FROM NEWCKB.PUBLIC.IX_SPC_POSITION
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -40,9 +40,9 @@ def fetch_position_by_id(user, password, position_id):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT POSITIONID, PLANOGRAMID, UPC, XCOORDINATE, YCOORDINATE, ZCOORDINATE, FACING, SHELFLEVEL 
-            FROM POSITIONS 
-            WHERE POSITIONID = %s
+            SELECT DBKEY, DBPRODUCTPARENTKEY, DBPLANOGRAMPARENTKEY, DBFIXTUREPARENTKEY, HFACING, VFACING, DFACING 
+            FROM NEWCKB.PUBLIC.IX_SPC_POSITION 
+            WHERE DBKEY = %s
         """, (position_id,))
         return cursor.fetchone()
     except Exception as e:
@@ -52,15 +52,15 @@ def fetch_position_by_id(user, password, position_id):
             conn.close()
 
 # Insert a new position
-def insert_position(user, password, planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level):
+def insert_position(user, password, db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO POSITIONS (PLANOGRAMID, UPC, XCOORDINATE, YCOORDINATE, ZCOORDINATE, FACING, SHELFLEVEL) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level))
+            INSERT INTO NEWCKB.PUBLIC.IX_SPC_POSITION (DBPRODUCTPARENTKEY, DBPLANOGRAMPARENTKEY, DBFIXTUREPARENTKEY, HFACING, VFACING, DFACING) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing))
         conn.commit()
         print(f"Inserted position")
     except Exception as e:
@@ -70,16 +70,16 @@ def insert_position(user, password, planogram_id, upc, x_coordinate, y_coordinat
             conn.close()
 
 # Update an existing position
-def update_position(user, password, position_id, planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level):
+def update_position(user, password, position_id, db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE POSITIONS
-            SET PLANOGRAMID = %s, UPC = %s, XCOORDINATE = %s, YCOORDINATE = %s, ZCOORDINATE = %s, FACING = %s, SHELFLEVEL = %s
-            WHERE POSITIONID = %s
-        """, (planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level, position_id))
+            UPDATE NEWCKB.PUBLIC.IX_SPC_POSITION
+            SET DBPRODUCTPARENTKEY = %s, DBPLANOGRAMPARENTKEY = %s, DBFIXTUREPARENTKEY = %s, HFACING = %s, VFACING = %s, DFACING = %s
+            WHERE DBKEY = %s
+        """, (db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing, position_id))
         conn.commit()
         print(f"Updated position ID: {position_id}")
     except Exception as e:
@@ -94,7 +94,7 @@ def delete_position(user, password, position_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM POSITIONS WHERE POSITIONID = %s", (position_id,))
+        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_POSITION WHERE DBKEY = %s", (position_id,))
         conn.commit()
         print(f"Deleted position ID: {position_id}")
     except Exception as e:
@@ -142,13 +142,12 @@ def get_position():
             "success": True,
             "position": {
                 "positionId": position[0],
-                "planogramId": position[1],
-                "upc": position[2],
-                "xCoordinate": position[3],
-                "yCoordinate": position[4],
-                "zCoordinate": position[5],
-                "facing": position[6],
-                "shelfLevel": position[7]
+                "dbProductParentKey": position[1],
+                "dbPlanogramParentKey": position[2],
+                "dbFixtureParentKey": position[3],
+                "hFacing": position[4],
+                "vFacing": position[5],
+                "dFacing": position[6]
             }
         })
     else:
@@ -164,19 +163,18 @@ def add_position():
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
-    planogram_id = data.get('planogramId')
-    upc = data.get('upc')
-    x_coordinate = data.get('xCoordinate')
-    y_coordinate = data.get('yCoordinate')
-    z_coordinate = data.get('zCoordinate')
-    facing = data.get('facing')
-    shelf_level = data.get('shelfLevel')
+    db_product_parent_key = data.get('dbProductParentKey')
+    db_planogram_parent_key = data.get('dbPlanogramParentKey')
+    db_fixture_parent_key = data.get('dbFixtureParentKey')
+    h_facing = data.get('hFacing')
+    v_facing = data.get('vFacing')
+    d_facing = data.get('dFacing')
     
-    if not (planogram_id and upc and x_coordinate and y_coordinate and z_coordinate and facing and shelf_level):
+    if not (db_product_parent_key and db_planogram_parent_key and db_fixture_parent_key and h_facing and v_facing and d_facing):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_position(user, password, planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level)
+        insert_position(user, password, db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -193,19 +191,18 @@ def update_position_route():
 
     data = request.get_json()
     position_id = data.get('positionId')
-    planogram_id = data.get('planogramId')
-    upc = data.get('upc')
-    x_coordinate = data.get('xCoordinate')
-    y_coordinate = data.get('yCoordinate')
-    z_coordinate = data.get('zCoordinate')
-    facing = data.get('facing')
-    shelf_level = data.get('shelfLevel')
+    db_product_parent_key = data.get('dbProductParentKey')
+    db_planogram_parent_key = data.get('dbPlanogramParentKey')
+    db_fixture_parent_key = data.get('dbFixtureParentKey')
+    h_facing = data.get('hFacing')
+    v_facing = data.get('vFacing')
+    d_facing = data.get('dFacing')
 
-    if not (position_id and planogram_id and upc and x_coordinate and y_coordinate and z_coordinate and facing and shelf_level):
+    if not (position_id and db_product_parent_key and db_planogram_parent_key and db_fixture_parent_key and h_facing and v_facing and d_facing):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_position(user, password, position_id, planogram_id, upc, x_coordinate, y_coordinate, z_coordinate, facing, shelf_level)
+        update_position(user, password, position_id, db_product_parent_key, db_planogram_parent_key, db_fixture_parent_key, h_facing, v_facing, d_facing)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

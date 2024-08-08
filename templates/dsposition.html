@@ -45,13 +45,12 @@
                 <thead>
                     <tr>
                         <th>Position ID</th>
-                        <th>Planogram ID</th>
-                        <th>UPC</th>
-                        <th>X Coordinate</th>
-                        <th>Y Coordinate</th>
-                        <th>Z Coordinate</th>
-                        <th>Facing</th>
-                        <th>Shelf Level</th>
+                        <th>Product Parent Key</th>
+                        <th>Planogram Parent Key</th>
+                        <th>Fixture Parent Key</th>
+                        <th>Horizontal Facing</th>
+                        <th>Vertical Facing</th>
+                        <th>Depth Facing</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -65,7 +64,6 @@
                         <td>{{ position[4] }}</td>
                         <td>{{ position[5] }}</td>
                         <td>{{ position[6] }}</td>
-                        <td>{{ position[7] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ position[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ position[0] }}">Delete</button>
@@ -82,26 +80,23 @@
         <div class="floating-form">
             <h2 id="formTitle">Add Position</h2>
             <form id="positionForm">
-                <label for="planogramId">Planogram ID</label>
-                <input type="number" id="planogramId" name="planogramId" required>
+                <label for="dbProductParentKey">Product Parent Key</label>
+                <input type="number" id="dbProductParentKey" name="dbProductParentKey" required>
 
-                <label for="upc">UPC</label>
-                <input type="text" id="upc" name="upc" required>
+                <label for="dbPlanogramParentKey">Planogram Parent Key</label>
+                <input type="number" id="dbPlanogramParentKey" name="dbPlanogramParentKey" required>
 
-                <label for="xCoordinate">X Coordinate</label>
-                <input type="number" id="xCoordinate" name="xCoordinate">
+                <label for="dbFixtureParentKey">Fixture Parent Key</label>
+                <input type="number" id="dbFixtureParentKey" name="dbFixtureParentKey" required>
 
-                <label for="yCoordinate">Y Coordinate</label>
-                <input type="number" id="yCoordinate" name="yCoordinate">
+                <label for="hFacing">Horizontal Facing</label>
+                <input type="number" id="hFacing" name="hFacing">
 
-                <label for="zCoordinate">Z Coordinate</label>
-                <input type="number" id="zCoordinate" name="zCoordinate">
+                <label for="vFacing">Vertical Facing</label>
+                <input type="number" id="vFacing" name="vFacing">
 
-                <label for="facing">Facing</label>
-                <input type="number" id="facing" name="facing">
-
-                <label for="shelfLevel">Shelf Level</label>
-                <input type="number" id="shelfLevel" name="shelfLevel">
+                <label for="dFacing">Depth Facing</label>
+                <input type="number" id="dFacing" name="dFacing">
 
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>
