@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const itemsContainer = document.getElementById('itemsContainer');
     const filterInput = document.getElementById('filterInput');
     const floatingFormContainer = document.getElementById('floatingFormContainer');
-    const planogramForm = document.getElementById('planogramForm');
+    const performanceForm = document.getElementById('performanceForm');
     const floatingMessage = document.getElementById('floatingMessage');
     const deleteConfirmation = document.getElementById('deleteConfirmation');
     const cancelDeleteButton = document.getElementById('cancelDelete');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentItemId = null;
 
     // Check if required elements are available
-    if (!filterInput || !itemsContainer || !floatingFormContainer || !planogramForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
+    if (!filterInput || !itemsContainer || !floatingFormContainer || !performanceForm || !floatingMessage || !deleteConfirmation || !cancelDeleteButton || !confirmDeleteButton || !addButton) {
         console.error('One or more required elements are missing.');
         return;
     }
@@ -39,18 +39,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Fetch and display items
+    // Fetch and display performance items
     async function fetchItems() {
         try {
-            const response = await fetch('/dsplanogram');
+            const response = await fetch('/dsperformance');
             const data = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
-            console.error('Error fetching planogram data:', error);
-            showMessage('error', 'Failed to load planogram data.');
+            console.error('Error fetching performance data:', error);
+            showMessage('error', 'Failed to load performance data.');
         }
     }
 
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Show form for adding new planogram record
+    // Show form for adding new performance record
     addButton.addEventListener('click', () => {
-        document.getElementById('formTitle').textContent = 'Add Planogram';
-        planogramForm.reset();
+        document.getElementById('formTitle').textContent = 'Add Performance';
+        performanceForm.reset();
         currentItemId = null;
         floatingFormContainer.style.display = 'flex';
     });
@@ -80,23 +80,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Handle form submission for add/update
-    planogramForm.addEventListener('submit', async (event) => {
+    performanceForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (!planogramForm.checkValidity()) {
+        if (!performanceForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
 
-        const formData = new FormData(planogramForm);
+        const formData = new FormData(performanceForm);
         const data = {
-            planogramId: currentItemId,
-            planogramName: formData.get('planogramName'),
-            pdfPath: formData.get('pdfPath'),
-            dbStatus: formData.get('dbStatus')
+            dbKey: currentItemId,
+            dbPlanogramParentKey: formData.get('dbPlanogramParentKey'),
+            dbProductParentKey: formData.get('dbProductParentKey'),
+            factings: formData.get('factings'),
+            capacity: formData.get('capacity'),
+            unitMovement: formData.get('unitMovement'),
+            sales: formData.get('sales'),
+            margen: formData.get('margen'),
+            cost: formData.get('cost')
         };
 
-        const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
+        const url = currentItemId ? `/dsperformance/update_performance` : '/dsperformance/add';
 
         try {
             const response = await fetch(url, {
@@ -110,11 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', currentItemId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
+                showMessage('success', currentItemId ? 'Performance updated successfully.' : 'Performance added successfully.');
                 await fetchItems();
                 floatingFormContainer.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to save planogram.');
+                throw new Error(result.message || 'Failed to save performance.');
             }
         } catch (error) {
             showMessage('error', error.message);
@@ -125,12 +130,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
             currentItemId = event.target.getAttribute('data-id');
-            document.getElementById('formTitle').textContent = 'Edit Planogram';
+            document.getElementById('formTitle').textContent = 'Edit Performance';
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('planogramName').value = fields[1].textContent;
-            document.getElementById('pdfPath').value = fields[2].textContent;
-            document.getElementById('dbStatus').value = fields[3].textContent;
+            document.getElementById('dbPlanogramParentKey').value = fields[1].textContent;
+            document.getElementById('dbProductParentKey').value = fields[2].textContent;
+            document.getElementById('factings').value = fields[3].textContent;
+            document.getElementById('capacity').value = fields[4].textContent;
+            document.getElementById('unitMovement').value = fields[5].textContent;
+            document.getElementById('sales').value = fields[6].textContent;
+            document.getElementById('margen').value = fields[7].textContent;
+            document.getElementById('cost').value = fields[8].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 
@@ -143,22 +153,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Confirm delete action
     confirmDeleteButton.addEventListener('click', async () => {
         try {
-            const response = await fetch(`/dsplanogram/delete_planogram`, {
+            const response = await fetch(`/dsperformance/delete_performance`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ planogramId: currentItemId }),
+                body: JSON.stringify({ dbKey: currentItemId }),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                showMessage('success', 'Planogram deleted successfully.');
+                showMessage('success', 'Performance deleted successfully.');
                 await fetchItems();
                 deleteConfirmation.style.display = 'none';
             } else {
-                throw new Error(result.message || 'Failed to delete planogram.');
+                throw new Error(result.message || 'Failed to delete performance.');
             }
         } catch (error) {
             showMessage('error', error.message);

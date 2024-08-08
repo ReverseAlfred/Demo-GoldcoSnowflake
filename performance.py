@@ -20,6 +20,7 @@ def get_snowflake_connection(user, password):
 # Fetch all performance records
 def fetch_performances(user, password):
     conn = None
+    cursor = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
@@ -31,76 +32,90 @@ def fetch_performances(user, password):
     except Exception as e:
         raise e
     finally:
+        if cursor:
+            cursor.close()
         if conn:
             conn.close()
 
 # Fetch performance record by ID
 def fetch_performance_by_id(user, password, performance_id):
     conn = None
+    cursor = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
             SELECT DBKEY, DBPLANOGRAMPARENTKEY, DBPRODUCTPARENTKEY, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST
             FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE
-            WHERE DBKEY = %s
+            WHERE DBKEY = ?
         """, (performance_id,))
         return cursor.fetchone()
     except Exception as e:
         raise e
     finally:
+        if cursor:
+            cursor.close()
         if conn:
             conn.close()
 
 # Insert a new performance record
 def insert_performance(user, password, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost):
     conn = None
+    cursor = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO NEWCKB.PUBLIC.IX_SPC_PERFORMANCE (DBPLANOGRAMPARENTKEY, DBPRODUCTPARENTKEY, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost))
         conn.commit()
         print(f"Inserted performance record")
     except Exception as e:
         raise e
     finally:
+        if cursor:
+            cursor.close()
         if conn:
             conn.close()
 
 # Update an existing performance record
 def update_performance(user, password, dbkey, dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost):
     conn = None
+    cursor = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE NEWCKB.PUBLIC.IX_SPC_PERFORMANCE
-            SET DBPLANOGRAMPARENTKEY = %s, DBPRODUCTPARENTKEY = %s, FACTINGS = %s, CAPACITY = %s, UNITMOVEMENT = %s, SALES = %s, MARGEN = %s, COST = %s
-            WHERE DBKEY = %s
+            SET DBPLANOGRAMPARENTKEY = ?, DBPRODUCTPARENTKEY = ?, FACTINGS = ?, CAPACITY = ?, UNITMOVEMENT = ?, SALES = ?, MARGEN = ?, COST = ?
+            WHERE DBKEY = ?
         """, (dbplanogramparentkey, dbproductparentkey, factings, capacity, unitmovement, sales, margen, cost, dbkey))
         conn.commit()
         print(f"Updated performance record ID: {dbkey}")
     except Exception as e:
         raise e
     finally:
+        if cursor:
+            cursor.close()
         if conn:
             conn.close()
 
 # Delete a performance record
 def delete_performance(user, password, performance_id):
     conn = None
+    cursor = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE WHERE DBKEY = %s", (performance_id,))
+        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_PERFORMANCE WHERE DBKEY = ?", (performance_id,))
         conn.commit()
         print(f"Deleted performance record ID: {performance_id}")
     except Exception as e:
         raise e
     finally:
+        if cursor:
+            cursor.close()
         if conn:
             conn.close()
 
