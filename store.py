@@ -22,7 +22,7 @@ def fetch_stores(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT DBKEY, STORENAME, DESCRIPTIVO1, DBSTATUS FROM IX_STR_STORE")
+        cursor.execute("SELECT STOREID, STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID FROM stores")
         return cursor.fetchall()
     except Exception as e:
         raise e
@@ -36,7 +36,7 @@ def fetch_store_by_id(user, password, store_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT DBKEY, STORENAME, DESCRIPTIVO1, DBSTATUS FROM IX_STR_STORE WHERE DBKEY = %s", (store_id,))
+        cursor.execute("SELECT STOREID, STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID FROM stores WHERE STOREID = %s", (store_id,))
         return cursor.fetchone()
     except Exception as e:
         raise e
@@ -50,7 +50,7 @@ def fetch_max_store_id(user, password):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("SELECT MAX(DBKEY) FROM IX_STR_STORE")
+        cursor.execute("SELECT MAX(STOREID) FROM stores")
         result = cursor.fetchone()
         return result[0] if result[0] is not None else 0
     except Exception as e:
@@ -60,15 +60,15 @@ def fetch_max_store_id(user, password):
             conn.close()
 
 # Insert a new store
-def insert_store(user, password, store_name, descriptivo1, dbstatus):
+def insert_store(user, password, store_name, location, size, manager, contact_info, cluster_id):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO IX_STR_STORE (STORENAME, DESCRIPTIVO1, DBSTATUS) 
-            VALUES (%s, %s, %s)
-        """, (store_name, descriptivo1, dbstatus))
+            INSERT INTO stores (STORENAME, LOCATION, SIZE, MANAGER, CONTACTINFO, CLUSTERID) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (store_name, location, size, manager, contact_info, cluster_id))
         conn.commit()
         print(f"Inserted store")
     except Exception as e:
@@ -78,16 +78,16 @@ def insert_store(user, password, store_name, descriptivo1, dbstatus):
             conn.close()
 
 # Update an existing store
-def update_store(user, password, store_id, store_name, descriptivo1, dbstatus):
+def update_store(user, password, store_id, store_name, location, size, manager, contact_info, cluster_id):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE IX_STR_STORE
-            SET STORENAME = %s, DESCRIPTIVO1 = %s, DBSTATUS = %s
-            WHERE DBKEY = %s
-        """, (store_name, descriptivo1, dbstatus, store_id))
+            UPDATE stores
+            SET STORENAME = %s, LOCATION = %s, SIZE = %s, MANAGER = %s, CONTACTINFO = %s, CLUSTERID = %s
+            WHERE STOREID = %s
+        """, (store_name, location, size, manager, contact_info, cluster_id, store_id))
         conn.commit()
         print(f"Updated store ID: {store_id}")
     except Exception as e:
@@ -102,7 +102,7 @@ def delete_store(user, password, store_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM IX_STR_STORE WHERE DBKEY = %s", (store_id,))
+        cursor.execute("DELETE FROM stores WHERE STOREID = %s", (store_id,))
         conn.commit()
         print(f"Deleted store ID: {store_id}")
     except Exception as e:
@@ -151,8 +151,11 @@ def get_store():
             "store": {
                 "storeId": store[0],
                 "storeName": store[1],
-                "descriptivo1": store[2],
-                "dbStatus": store[3]
+                "location": store[2],
+                "size": store[3],
+                "manager": store[4],
+                "contactInfo": store[5],
+                "clusterId": store[6]
             }
         })
     else:
@@ -169,14 +172,17 @@ def add_store():
 
     data = request.get_json()
     store_name = data.get('storeName')
-    descriptivo1 = data.get('descriptivo1')
-    dbstatus = data.get('dbStatus')
+    location = data.get('location')
+    size = data.get('size')
+    manager = data.get('manager')
+    contact_info = data.get('contactInfo')
+    cluster_id = data.get('clusterId')
     
-    if not (store_name and descriptivo1 is not None and dbstatus is not None):
+    if not (store_name and location and size and manager and contact_info and cluster_id):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_store(user, password, store_name, descriptivo1, dbstatus)
+        insert_store(user, password, store_name, location, size, manager, contact_info, cluster_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -194,14 +200,17 @@ def update_store_route():
     data = request.get_json()
     store_id = data.get('storeId')
     store_name = data.get('storeName')
-    descriptivo1 = data.get('descriptivo1')
-    dbstatus = data.get('dbStatus')
+    location = data.get('location')
+    size = data.get('size')
+    manager = data.get('manager')
+    contact_info = data.get('contactInfo')
+    cluster_id = data.get('clusterId')
 
-    if not (store_id and store_name and descriptivo1 is not None and dbstatus is not None):
+    if not (store_id and store_name and location and size and manager and contact_info and cluster_id):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_store(user, password, store_id, store_name, descriptivo1, dbstatus)
+        update_store(user, password, store_id, store_name, location, size, manager, contact_info, cluster_id)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
