@@ -52,7 +52,7 @@
                 <tbody>
                     {% for cluster in clusters %}
                     <tr class="item">
-                        <td>{{ cluster[0] }}</td>
+                        <td><a href="/clstore?clusterId={{ cluster[0] }}" class="cluster-link">{{ cluster[0] }}</a></td>
                         <td>{{ cluster[1] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ cluster[0] }}">Edit</button>
@@ -60,7 +60,7 @@
                         </td>
                     </tr>
                     {% endfor %}
-                </tbody>
+                </tbody>                
             </table>
         </div>
     </div>
