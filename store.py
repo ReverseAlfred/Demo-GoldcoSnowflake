@@ -70,7 +70,6 @@ def insert_store(user, password, store_name, descriptivo1, dbstatus):
             VALUES (%s, %s, %s)
         """, (store_name, descriptivo1, dbstatus))
         conn.commit()
-        print(f"Inserted store")
     except Exception as e:
         raise e
     finally:
@@ -89,7 +88,6 @@ def update_store(user, password, store_id, store_name, descriptivo1, dbstatus):
             WHERE DBKEY = %s
         """, (store_name, descriptivo1, dbstatus, store_id))
         conn.commit()
-        print(f"Updated store ID: {store_id}")
     except Exception as e:
         raise e
     finally:
@@ -104,7 +102,6 @@ def delete_store(user, password, store_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_STR_STORE WHERE DBKEY = %s", (store_id,))
         conn.commit()
-        print(f"Deleted store ID: {store_id}")
     except Exception as e:
         raise e
     finally:
@@ -229,14 +226,15 @@ def delete_store_route():
 
     return jsonify({"success": True}), 200
 
+# Route to display stores in a cluster
 @store_bp.route('/clstore')
 def clstore():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
-    
+
     if not user or not password:
         return "Error: Missing credentials", 401
-    
+
     cluster_id = request.args.get('clusterId')
     if not cluster_id:
         return "Error: Cluster ID is required", 400
@@ -245,7 +243,6 @@ def clstore():
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
 
-        # Fetch stores for the given cluster
         cursor.execute("""
             SELECT S.DBKEY, S.STORENAME
             FROM NEWCKB.PUBLIC.IX_STR_STORE S
@@ -255,7 +252,6 @@ def clstore():
         """, (cluster_id,))
         stores = cursor.fetchall()
 
-        # Fetch all stores for the dropdown
         cursor.execute("SELECT DBKEY, STORENAME FROM NEWCKB.PUBLIC.IX_STR_STORE")
         all_stores = cursor.fetchall()
 
@@ -264,21 +260,19 @@ def clstore():
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-
-
-# Add a store to the cluster
+# Add a store to a cluster
 @store_bp.route('/clstore/add_store', methods=['POST'])
 def add_store_to_cluster():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
-    
+
     if not user or not password:
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
     data = request.get_json()
     cluster_id = data.get('clusterId')
     store_id = data.get('storeId')
-    
+
     if not (cluster_id and store_id):
         return jsonify({"success": False, "message": "Cluster ID and Store ID are required"}), 400
 
@@ -286,7 +280,7 @@ def add_store_to_cluster():
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER_STORE (DBCLUSTERPARENTKEY, DBSTOREPARENTKEY)
+            INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER_STORE (DBCLUSTERPARENTKEY, DBSTOREPARENTKEY) 
             VALUES (%s, %s)
         """, (cluster_id, store_id))
         conn.commit()
@@ -294,7 +288,7 @@ def add_store_to_cluster():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
-# Remove a store from the cluster
+# Remove a store from a cluster
 @store_bp.route('/clstore/delete_store', methods=['POST'])
 def delete_store_from_cluster():
     user = request.cookies.get('snowflake_username')

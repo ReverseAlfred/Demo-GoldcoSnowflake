@@ -4,20 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cluster Store</title>
-    <!-- Link to external CSS stylesheet -->
+    <title>Cluster Store Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/clstore.css') }}">
 </head>
 
 <body>
-    <!-- Header section -->
     <div class="header">
         <h1>Cluster Store Management</h1>
     </div>
 
-    <!-- Main container for layout -->
     <div class="container">
-        <!-- Sidebar navigation -->
         <div class="sidebar">
             <button id="dashboardButton">Dashboard</button>
             <button id="clusterButton">Cluster</button>
@@ -29,18 +25,14 @@
             <button id="positionsButton">Positions</button>
         </div>
 
-        <!-- Main content area -->
         <div class="main-content">
-            <!-- Floating message area -->
             <div id="floatingMessage" class="floating-message"></div>
 
-            <!-- Filter and add button -->
             <div class="filter-bar">
                 <input type="text" id="filterInput" placeholder="Search...">
                 <button id="addButton" class="custom-style">Add Store</button>
             </div>
 
-            <!-- Table of stores -->
             <table id="itemsContainer">
                 <thead>
                     <tr>
@@ -55,24 +47,39 @@
                         <td>{{ store[0] }}</td>
                         <td>{{ store[1] }}</td>
                         <td>
-                            <!-- Only delete button -->
-                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Delete</button>
+                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Remove</button>
                         </td>
                     </tr>
                     {% endfor %}
-                </tbody>                
+                </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Delete Confirmation -->
+    <div id="floatingFormContainer" class="floating-form-container">
+        <div class="floating-form">
+            <h2 id="formTitle">Add Store to Cluster</h2>
+            <form id="storeForm">
+                <label for="storeSelect">Select Store</label>
+                <select id="storeSelect" name="storeId">
+                    {% for store in all_stores %}
+                        <option value="{{ store[0] }}">{{ store[1] }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Add</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+    </div>
+
     <div id="deleteConfirmation" class="delete-confirmation">
-        <p>Are you sure you want to delete this store?</p>
+        <p>Are you sure you want to remove this store from the cluster?</p>
         <button id="confirmDelete" class="custom-style">Yes</button>
         <button id="cancelDelete" class="custom-style">No</button>
     </div>
 
-    <!-- Link to external JavaScript file -->
+    <!-- Ensure the URL parameter is correctly set -->
     <script src="{{ url_for('static', filename='js/clstore.js') }}"></script>
 </body>
 
