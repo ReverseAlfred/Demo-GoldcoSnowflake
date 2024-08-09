@@ -244,7 +244,7 @@ def clstore():
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT S.DBKEY, S.STORENAME
+            SELECT S.DBKEY, S.STORENAME, S.DESCRIPTIVO1, S.DBSTATUS
             FROM NEWCKB.PUBLIC.IX_STR_STORE S
             JOIN NEWCKB.PUBLIC.IX_EIA_CLUSTER_STORE CS
             ON S.DBKEY = CS.DBSTOREPARENTKEY
@@ -252,13 +252,14 @@ def clstore():
         """, (cluster_id,))
         stores = cursor.fetchall()
 
-        cursor.execute("SELECT DBKEY, STORENAME FROM NEWCKB.PUBLIC.IX_STR_STORE")
+        cursor.execute("SELECT DBKEY, STORENAME, DESCRIPTIVO1, DBSTATUS FROM NEWCKB.PUBLIC.IX_STR_STORE")
         all_stores = cursor.fetchall()
 
         return render_template('clstore.html', stores=stores, all_stores=all_stores, cluster_id=cluster_id)
 
     except Exception as e:
         return f"Error: {str(e)}", 500
+
 
 # Add a store to a cluster
 @store_bp.route('/clstore/add_store', methods=['POST'])

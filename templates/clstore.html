@@ -32,12 +32,13 @@
                 <input type="text" id="filterInput" placeholder="Search...">
                 <button id="addButton" class="custom-style">Add Store</button>
             </div>
-
             <table id="itemsContainer">
                 <thead>
                     <tr>
                         <th>Store ID</th>
                         <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -46,8 +47,10 @@
                     <tr class="item">
                         <td>{{ store[0] }}</td>
                         <td>{{ store[1] }}</td>
+                        <td>{{ store[2] }}</td>
+                        <td>{{ store[3] }}</td>
                         <td>
-                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Remove</button>
+                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}

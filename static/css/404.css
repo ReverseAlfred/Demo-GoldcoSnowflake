@@ -1,0 +1,83 @@
+/* General layout styles */
+.container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif; /* Consistent font-family */
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 220px; /* Adequate width for navigation */
+    background-color: #2c3e50; /* Dark background for sidebar */
+    padding: 15px; /* Padding for spacing */
+    box-sizing: border-box;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: #34495e; /* Slightly lighter than sidebar */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Rounded corners for buttons */
+}
+
+.sidebar button:hover {
+    background-color: #1abc9c; /* Vibrant hover effect */
+}
+
+/* Main content styles */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; /* Scrollbar for overflow */
+    max-height: calc(100vh - 40px); /* Fit content within container */
+}
+
+/* Floating message styles */
+.floating-message {
+    display: none;
+    position: fixed;
+    bottom: 20px; /* Position at the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px 40px; /* Larger padding for better visibility */
+    border-radius: 8px; /* Larger border radius */
+    color: white;
+    font-size: 18px; /* Larger font size */
+    z-index: 1200; /* Ensure it appears above other content */
+    pointer-events: none; /* Prevent interaction */
+}
+
+.floating-message.show {
+    display: block;
+}
+
+.floating-message.success {
+    background-color: #27ae60; /* Green for success */
+}
+
+.floating-message.error {
+    background-color: #e74c3c; /* Red for error */
+}
+
+/* Top Title styles */
+.header {
+    background-color: #2c3e50; /* Match sidebar background */
+    color: white;
+    padding: 15px 20px; /* Match padding of sidebar buttons */
+    box-sizing: border-box;
+    font-size: 24px; /* Adjust font size for the title */
+    font-weight: bold;
+    text-align: center; /* Center align the title */
+    border-bottom: 1px solid #34495e; /* Add a border to match sidebar button style */
+    font-family: Arial, sans-serif; /* Match font-family with sidebar */
+}
+
+.header h1 {
+    margin: 0; /* Remove default margin */
+}

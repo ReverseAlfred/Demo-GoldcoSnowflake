@@ -53,9 +53,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`/clstore?clusterId=${currentClusterId}`);
             const data = await response.text();
+            console.log('Fetched HTML:', data); // Log the fetched HTML for inspection
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
+            console.log('New TBody content:', newTbody); // Log the new table body content
             itemsContainer.querySelector('tbody').innerHTML = newTbody;
         } catch (error) {
             console.error('Error fetching cluster store data:', error);
@@ -122,6 +124,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Handle delete button click
     itemsContainer.addEventListener('click', (event) => {
+        if (event.target.classList.contains('edit-button')) {
+            currentItemId = event.target.getAttribute('data-id');
+            document.getElementById('formTitle').textContent = 'Edit Store';
+            const item = event.target.closest('.item');
+            const fields = item.querySelectorAll('td');
+            document.getElementById('storeName').value = fields[1].textContent;
+            document.getElementById('descriptivo1').value = fields[2].textContent;
+            document.getElementById('dbStatus').value = fields[3].textContent;
+            floatingFormContainer.style.display = 'flex';
+        }
+
         if (event.target.classList.contains('delete-button')) {
             currentItemId = event.target.getAttribute('data-id');
             deleteConfirmation.style.display = 'flex';
