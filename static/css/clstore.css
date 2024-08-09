@@ -1,0 +1,221 @@
+/* General layout styles */
+.container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif; /* Added font-family for consistency */
+}
+
+/* Sidebar styles */
+.sidebar {
+    width: 220px; /* Increased width for better spacing */
+    background-color: #2c3e50; /* Darker shade for better readability */
+    padding: 15px; /* Increased padding */
+    box-sizing: border-box;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: #34495e; /* Slightly lighter than sidebar background */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Added border radius for buttons */
+}
+
+.sidebar button:hover {
+    background-color: #1abc9c; /* Added vibrant hover effect */
+}
+
+/* Top Title styles */
+.header {
+    background-color: #2c3e50; /* Match sidebar background */
+    color: white;
+    padding: 15px 20px; /* Match padding of sidebar buttons */
+    box-sizing: border-box;
+    font-size: 24px; /* Adjust font size for the title */
+    font-weight: bold;
+    text-align: center; /* Center align the title */
+    border-bottom: 1px solid #34495e; /* Add a border to match sidebar button style */
+    font-family: Arial, sans-serif; /* Match font-family with sidebar */
+}
+
+.header h1 {
+    margin: 0; /* Remove default margin */
+}
+
+/* Main content styles */
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; /* Add scrollbar for content overflow */
+    max-height: calc(100vh - 40px); /* Adjust height to fit the container */
+}
+
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+#filterInput {
+    width: 70%;
+    padding: 12px; /* Increased padding for better usability */
+    box-sizing: border-box;
+    border: 1px solid #ddd; /* Added border for clarity */
+    border-radius: 5px; /* Added border radius for consistency */
+}
+
+#addButton {
+    padding: 12px 24px;
+    background-color: #27ae60; /* Green button for positive action */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Added border radius */
+}
+
+#addButton:hover {
+    background-color: #2ecc71; /* Slightly lighter on hover */
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px; /* Increased padding for better readability */
+    text-align: left;
+}
+
+th {
+    background-color: #ecf0f1; /* Light grey for headers */
+}
+
+.item {
+    background-color: #f9f9f9;
+}
+
+.item:hover {
+    background-color: #f1f1f1;
+}
+
+/* Floating form styles */
+.floating-form-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    overflow: auto; /* Add scrollbar if needed */
+    z-index: 1000; /* Ensure it appears above other content */
+}
+
+.floating-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px; /* Larger border radius */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4); /* Slightly darker shadow */
+    max-height: 90vh; /* Limit height to fit in viewport */
+    overflow-y: auto; /* Add scrollbar if content overflows */
+}
+
+.floating-form h2 {
+    margin-top: 0;
+}
+
+.floating-form label {
+    display: block;
+    margin: 12px 0 6px; /* Increased spacing */
+}
+
+.floating-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px; /* Increased margin for spacing */
+    box-sizing: border-box;
+    border: 1px solid #ddd; /* Added border for clarity */
+    border-radius: 5px; /* Added border radius */
+}
+
+.floating-form button {
+    padding: 12px 24px;
+    background-color: #3498db; /* Blue button for action */
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Added border radius */
+}
+
+.floating-form button:hover {
+    background-color: #2980b9; /* Slightly darker blue on hover */
+}
+
+/* Floating message styles */
+.floating-message {
+    display: none;
+    position: fixed;
+    bottom: 20px; /* Position at the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px 40px; /* Larger padding for better visibility */
+    border-radius: 8px; /* Larger border radius */
+    color: white;
+    font-size: 18px; /* Larger font size */
+    z-index: 1200; /* Ensure it appears above other content */
+    pointer-events: none; /* Prevent interaction */
+}
+
+.floating-message.success {
+    background-color: #27ae60; /* Green for success */
+}
+
+.floating-message.error {
+    background-color: #e74c3c; /* Red for error */
+}
+
+/* Delete confirmation styles */
+.delete-confirmation {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px; /* Larger border radius */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.4); /* Slightly darker shadow */
+    z-index: 1000; /* Ensure it appears above other content */
+}
+
+.delete-confirmation p {
+    margin: 0 0 20px;
+}
+
+.delete-confirmation button {
+    padding: 12px 24px;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Added border radius */
+}
+
+.delete-confirmation button:first-child {
+    background-color: #e74c3c; /* Red for confirmation */
+    color: white;
+}
+
+.delete-confirmation button:last-child {
+    background-color: #95a5a6; /* Gray for cancel */
+    color: white;
+}
