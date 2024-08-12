@@ -318,16 +318,32 @@ def insert_store_to_cluster(user, password, cluster_id, store_id):
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
+
+        # Check if the relationship already exists
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER_STORE
+            WHERE DBCLUSTERPARENTKEY = %s AND DBSTOREPARENTKEY = %s
+        """, (cluster_id, store_id))
+        exists = cursor.fetchone()[0] > 0
+
+        if exists:
+            raise ValueError("The relationship already exists")
+
+        # Insert the new entry if it doesn't exist
         cursor.execute("""
             INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER_STORE (DBCLUSTERPARENTKEY, DBSTOREPARENTKEY) 
             VALUES (%s, %s)
         """, (cluster_id, store_id))
         conn.commit()
+
     except Exception as e:
         raise e
+
     finally:
         if conn:
             conn.close()
+
 
 # Helper function to delete a store from a cluster
 def delete_store_from_cluster(user, password, cluster_id, store_id):

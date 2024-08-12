@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cluster Store Management</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/clstore.css') }}">
+    <title>Store Floor Plan Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stfloorplan.css') }}">
 </head>
 
 <body>
     <div class="header">
-        <h1>Cluster Store Management</h1>
+        <h1>Store Floor Plan Management</h1>
     </div>
 
     <div class="container">
@@ -30,27 +30,25 @@
 
             <div class="filter-bar">
                 <input type="text" id="filterInput" placeholder="Search...">
-                <button id="addButton" class="custom-style">Add Store</button>
+                <button id="addButton" class="custom-style">Add Floorplan</button>
             </div>
             <table id="itemsContainer">
                 <thead>
                     <tr>
-                        <th>Store ID</th>
+                        <th>Floorplan ID</th>
                         <th>Name</th>
-                        <th>Description</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for store in stores %}
+                    {% for floorplan in floorplans %}
                     <tr class="item">
-                        <td><a href="/stfloorplan?storeId={{ store[0] }}" class="store-link">{{ store[0] }}</a></td>
-                        <td>{{ store[1] }}</td>
-                        <td>{{ store[2] }}</td>
-                        <td>{{ store[3] }}</td>
+                        <td>{{ floorplan[0] }}</td>
+                        <td>{{ floorplan[1] }}</td>
+                        <td>{{ floorplan[2] }}</td>
                         <td>
-                            <button class="delete-button custom-style" data-id="{{ store[0] }}">Delete</button>
+                            <button class="delete-button custom-style" data-id="{{ floorplan[0] }}">Remove</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -61,12 +59,12 @@
 
     <div id="floatingFormContainer" class="floating-form-container">
         <div class="floating-form">
-            <h2 id="formTitle">Add Store to Cluster</h2>
-            <form id="storeForm">
-                <label for="storeSelect">Select Store</label>
-                <select id="storeSelect" name="storeId">
-                    {% for store in all_stores %}
-                        <option value="{{ store[0] }}">{{ store[1] }}</option>
+            <h2 id="formTitle">Add Floorplan to Store</h2>
+            <form id="floorplanForm">
+                <label for="floorplanSelect">Select Floorplan</label>
+                <select id="floorplanSelect" name="floorplanId">
+                    {% for floorplan in all_floorplans %}
+                        <option value="{{ floorplan[0] }}">{{ floorplan[1] }}</option>
                     {% endfor %}
                 </select>
 
@@ -77,13 +75,12 @@
     </div>
 
     <div id="deleteConfirmation" class="delete-confirmation">
-        <p>Are you sure you want to remove this store from the cluster?</p>
+        <p>Are you sure you want to remove this floorplan from the store?</p>
         <button id="confirmDelete" class="custom-style">Yes</button>
         <button id="cancelDelete" class="custom-style">No</button>
     </div>
 
-    <!-- Ensure the URL parameter is correctly set -->
-    <script src="{{ url_for('static', filename='js/clstore.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/stfloorplan.js') }}"></script>
 </body>
 
 </html>
