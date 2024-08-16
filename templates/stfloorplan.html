@@ -44,7 +44,7 @@
                 <tbody>
                     {% for floorplan in floorplans %}
                     <tr class="item">
-                        <td>{{ floorplan[0] }}</td>
+                        <td><a href="/flplanogram?floorplanId={{ floorplan[0] }}" class="floorplan-link">{{ floorplan[0] }}</a></td>
                         <td>{{ floorplan[1] }}</td>
                         <td>{{ floorplan[2] }}</td>
                         <td>
