@@ -70,7 +70,7 @@ def insert_planogram(user, password, planogramname, pdfpath, dbstatus):
             conn.close()
 
 # Update an existing planogram record
-def update_planogram(user, password, dbkey, planogramname, pdfpath, dbstatus):
+def update_planogram(user, password, planogram_id, planogramname, pdfpath, dbstatus):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
@@ -79,9 +79,9 @@ def update_planogram(user, password, dbkey, planogramname, pdfpath, dbstatus):
             UPDATE NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
             SET PLANOGRAMNAME = %s, PDFPATH = %s, DBSTATUS = %s
             WHERE DBKEY = %s
-        """, (planogramname, pdfpath, dbstatus, dbkey))
+        """, (planogramname, pdfpath, dbstatus, planogram_id))
         conn.commit()
-        print(f"Updated planogram record ID: {dbkey}")
+        print(f"Updated planogram record ID: {planogram_id}")
     except Exception as e:
         raise e
     finally:

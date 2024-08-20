@@ -82,22 +82,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle form submission for add/update
     planogramForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
+    
         if (!planogramForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
         }
-
+    
         const formData = new FormData(planogramForm);
         const data = {
-            planogramId: currentItemId,
+            dbKey: currentItemId,  // Ensure this matches the backend expectation
             planogramName: formData.get('planogramName'),
             pdfPath: formData.get('pdfPath'),
             dbStatus: formData.get('dbStatus')
         };
-
+    
         const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
-
+    
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -106,9 +106,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 body: JSON.stringify(data),
             });
-
+    
             const result = await response.json();
-
+    
             if (response.ok) {
                 showMessage('success', currentItemId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
                 await fetchItems();
@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showMessage('error', error.message);
         }
     });
+
 
     // Handle edit and delete button clicks
     itemsContainer.addEventListener('click', (event) => {
