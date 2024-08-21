@@ -32,13 +32,11 @@
                 <input type="text" id="filterInput" placeholder="Search...">
                 <button id="addButton" class="custom-style">Add Planogram</button>
             </div>
-
             <table id="itemsContainer">
                 <thead>
                     <tr>
                         <th>Planogram ID</th>
                         <th>Planogram Name</th>
-                        <th>PDF Path</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -48,8 +46,7 @@
                     <tr class="item">
                         <td>{{ planogram[0] }}</td>
                         <td>{{ planogram[1] }}</td>
-                        <td><a href="{{ planogram[2] }}" target="_blank">{{ planogram[2] }}</a></td>
-                        <td>{{ planogram[3] }}</td>
+                        <td>{{ planogram[2] }}</td>
                         <td>
                             <button class="edit-button custom-style" data-id="{{ planogram[0] }}">Edit</button>
                             <button class="delete-button custom-style" data-id="{{ planogram[0] }}">Delete</button>
@@ -57,7 +54,7 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-            </table>
+            </table>            
         </div>
     </div>
 
@@ -67,13 +64,10 @@
             <form id="planogramForm">
                 <label for="planogramName">Planogram Name</label>
                 <input type="text" id="planogramName" name="planogramName" required>
-
-                <label for="pdfPath">PDF Path</label>
-                <input type="text" id="pdfPath" name="pdfPath" required>
-
+            
                 <label for="dbStatus">Status</label>
                 <input type="number" id="dbStatus" name="dbStatus" required>
-
+            
                 <button type="submit">Save</button>
                 <button type="button" id="cancelButton">Cancel</button>
             </form>

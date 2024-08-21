@@ -79,10 +79,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    // Handle form submission for add/update
     planogramForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-    
+        
+        // Validate form
         if (!planogramForm.checkValidity()) {
             showMessage('error', 'Please fill in all required fields.');
             return;
@@ -90,12 +90,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     
         const formData = new FormData(planogramForm);
         const data = {
-            dbKey: currentItemId,  // Ensure this matches the backend expectation
-            planogramName: formData.get('planogramName'),
-            pdfPath: formData.get('pdfPath'),
-            dbStatus: formData.get('dbStatus')
+            planogramName: formData.get('planogramName') || '',  // Ensure non-null value
+            dbStatus: parseInt(formData.get('dbStatus')) || 0  // Ensure integer value
         };
-    
+        
+        // Debugging - log data before sending
+        console.log('Data being sent:', data);
+        
+        if (!data.planogramName || isNaN(data.dbStatus)) {
+            showMessage('error', 'All fields are required.');
+            return;
+        }
+        
         const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
     
         try {
@@ -111,16 +117,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     
             if (response.ok) {
                 showMessage('success', currentItemId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
-                await fetchItems();
                 floatingFormContainer.style.display = 'none';
+                await fetchItems();  // Refresh the items list
             } else {
-                throw new Error(result.message || 'Failed to save planogram.');
+                showMessage('error', result.message || 'Failed to save planogram.');
             }
         } catch (error) {
-            showMessage('error', error.message);
+            console.error('Error saving planogram:', error);
+            showMessage('error', 'An error occurred while saving the planogram.');
         }
-    });
-
+    });    
 
     // Handle edit and delete button clicks
     itemsContainer.addEventListener('click', (event) => {
@@ -130,8 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
             document.getElementById('planogramName').value = fields[1].textContent;
-            document.getElementById('pdfPath').value = fields[2].textContent;
-            document.getElementById('dbStatus').value = fields[3].textContent;
+            document.getElementById('dbStatus').value = fields[2].textContent;
             floatingFormContainer.style.display = 'flex';
         }
 

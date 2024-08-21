@@ -23,7 +23,7 @@ def fetch_planograms(user, password):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT DBKEY, PLANOGRAMNAME, PDFPATH, DBSTATUS
+            SELECT DBKEY, PLANOGRAMNAME, DBSTATUS
             FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
         """)
         return cursor.fetchall()
@@ -40,7 +40,7 @@ def fetch_planogram_by_id(user, password, planogram_id):
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT DBKEY, PLANOGRAMNAME, PDFPATH, DBSTATUS
+            SELECT DBKEY, PLANOGRAMNAME, DBSTATUS
             FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
             WHERE DBKEY = %s
         """, (planogram_id,))
@@ -52,17 +52,16 @@ def fetch_planogram_by_id(user, password, planogram_id):
             conn.close()
 
 # Insert a new planogram record
-def insert_planogram(user, password, planogramname, pdfpath, dbstatus):
+def insert_planogram(user, password, planogramname, dbstatus):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO NEWCKB.PUBLIC.IX_SPC_PLANOGRAM (PLANOGRAMNAME, PDFPATH, DBSTATUS)
-            VALUES (%s, %s, %s)
-        """, (planogramname, pdfpath, dbstatus))
+            INSERT INTO NEWCKB.PUBLIC.IX_SPC_PLANOGRAM (PLANOGRAMNAME, DBSTATUS)
+            VALUES (%s, %s)
+        """, (planogramname, dbstatus))
         conn.commit()
-        print(f"Inserted planogram record")
     except Exception as e:
         raise e
     finally:
@@ -70,18 +69,17 @@ def insert_planogram(user, password, planogramname, pdfpath, dbstatus):
             conn.close()
 
 # Update an existing planogram record
-def update_planogram(user, password, planogram_id, planogramname, pdfpath, dbstatus):
+def update_planogram(user, password, planogram_id, planogramname, dbstatus):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
-            SET PLANOGRAMNAME = %s, PDFPATH = %s, DBSTATUS = %s
+            SET PLANOGRAMNAME = %s, DBSTATUS = %s
             WHERE DBKEY = %s
-        """, (planogramname, pdfpath, dbstatus, planogram_id))
+        """, (planogramname, dbstatus, planogram_id))
         conn.commit()
-        print(f"Updated planogram record ID: {planogram_id}")
     except Exception as e:
         raise e
     finally:
@@ -96,7 +94,6 @@ def delete_planogram(user, password, planogram_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM WHERE DBKEY = %s", (planogram_id,))
         conn.commit()
-        print(f"Deleted planogram record ID: {planogram_id}")
     except Exception as e:
         raise e
     finally:
@@ -143,8 +140,7 @@ def get_planogram():
             "planogram": {
                 "dbKey": planogram[0],
                 "planogramName": planogram[1],
-                "pdfPath": planogram[2],
-                "dbStatus": planogram[3]
+                "dbStatus": planogram[2]
             }
         })
     else:
@@ -161,14 +157,13 @@ def add_planogram():
 
     data = request.get_json()
     planogramname = data.get('planogramName')
-    pdfpath = data.get('pdfPath')
     dbstatus = data.get('dbStatus', 1)  # Default to 1 if not provided
 
-    if not (planogramname and pdfpath and dbstatus is not None):
+    if not (planogramname and dbstatus is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        insert_planogram(user, password, planogramname, pdfpath, dbstatus)
+        insert_planogram(user, password, planogramname, dbstatus)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -186,14 +181,13 @@ def update_planogram_route():
     data = request.get_json()
     dbkey = data.get('dbKey')
     planogramname = data.get('planogramName')
-    pdfpath = data.get('pdfPath')
     dbstatus = data.get('dbStatus')
 
-    if not (dbkey and planogramname and pdfpath and dbstatus is not None):
+    if not (dbkey and planogramname and dbstatus is not None):
         return jsonify({"success": False, "message": "All fields are required"}), 400
 
     try:
-        update_planogram(user, password, dbkey, planogramname, pdfpath, dbstatus)
+        update_planogram(user, password, dbkey, planogramname, dbstatus)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -239,7 +233,7 @@ def flplanogram():
 
         # Query to get the planograms associated with the given floorplan
         cursor.execute("""
-            SELECT P.DBKEY, P.PLANOGRAMNAME, P.PDFPATH, P.DBSTATUS
+            SELECT P.DBKEY, P.PLANOGRAMNAME, P.DBSTATUS
             FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM P
             JOIN NEWCKB.PUBLIC.IX_FLR_PERFORMANCE FP
             ON P.DBKEY = FP.DBPLANOGRAMPARENTKEY
@@ -248,7 +242,7 @@ def flplanogram():
         planograms = cursor.fetchall()
 
         # Query to get all planograms (possibly for display or selection purposes)
-        cursor.execute("SELECT DBKEY, PLANOGRAMNAME, PDFPATH, DBSTATUS FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM")
+        cursor.execute("SELECT DBKEY, PLANOGRAMNAME, DBSTATUS FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM")
         all_planograms = cursor.fetchall()
 
         # Render the template with the retrieved data
@@ -276,21 +270,10 @@ def add_planogram_to_floorplan():
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
 
-        # Check if the planogram is already associated with the floorplan
+        # Insert the new relationship between floorplan and planogram
         cursor.execute("""
-            SELECT COUNT(*)
-            FROM NEWCKB.PUBLIC.IX_FLR_PERFORMANCE
-            WHERE DBFLOORPLANPARENTKEY = %s AND DBPLANOGRAMPARENTKEY = %s
-        """, (floorplan_id, planogram_id))
-        exists = cursor.fetchone()[0] > 0
-
-        if exists:
-            return jsonify({"success": False, "message": "The planogram is already associated with the floorplan"}), 400
-
-        # Insert the new association if it doesn't exist
-        cursor.execute("""
-            INSERT INTO NEWCKB.PUBLIC.IX_FLR_PERFORMANCE (DBFLOORPLANPARENTKEY, DBPLANOGRAMPARENTKEY, CAPACITY)
-            VALUES (%s, %s, 0)
+            INSERT INTO NEWCKB.PUBLIC.IX_FLR_PERFORMANCE (DBFLOORPLANPARENTKEY, DBPLANOGRAMPARENTKEY)
+            VALUES (%s, %s)
         """, (floorplan_id, planogram_id))
         conn.commit()
 
@@ -303,11 +286,11 @@ def add_planogram_to_floorplan():
         if conn:
             conn.close()
 
-@planogram_bp.route('/flplanogram/delete_planogram', methods=['POST'])
-def delete_planogram_from_floorplan():
+@planogram_bp.route('/flplanogram/remove_planogram', methods=['POST'])
+def remove_planogram_from_floorplan():
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
-    
+
     if not user or not password:
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
@@ -316,57 +299,24 @@ def delete_planogram_from_floorplan():
     planogram_id = data.get('planogramId')
 
     if not (floorplan_id and planogram_id):
-        return jsonify({"success": False, "message": "All fields are required"}), 400
+        return jsonify({"success": False, "message": "Floorplan ID and Planogram ID are required"}), 400
 
-    try:
-        delete_planogram_from_floorplan(user, password, floorplan_id, planogram_id)
-        return jsonify({"success": True}), 200
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-def insert_planogram_to_floorplan(user, password, floorplan_id, planogram_id):
-    conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
 
-        # Check if the relationship already exists
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM NEWCKB.PUBLIC.IX_FLR_PERFORMANCE
-            WHERE DBFLOORPLANPARENTKEY = %s AND DBPLANOGRAMPARENTKEY = %s
-        """, (floorplan_id, planogram_id))
-        exists = cursor.fetchone()[0] > 0
-
-        if exists:
-            raise ValueError("The relationship already exists")
-
-        # Insert the new entry if it doesn't exist
-        cursor.execute("""
-            INSERT INTO NEWCKB.PUBLIC.IX_FLR_PERFORMANCE (DBFLOORPLANPARENTKEY, DBPLANOGRAMPARENTKEY, CAPACITY)
-            VALUES (%s, %s, 0)
-        """, (floorplan_id, planogram_id))
-        conn.commit()
-
-    except Exception as e:
-        raise e
-
-    finally:
-        if conn:
-            conn.close()
-
-def delete_planogram_from_floorplan(user, password, floorplan_id, planogram_id):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
+        # Delete the relationship between floorplan and planogram
         cursor.execute("""
             DELETE FROM NEWCKB.PUBLIC.IX_FLR_PERFORMANCE
             WHERE DBFLOORPLANPARENTKEY = %s AND DBPLANOGRAMPARENTKEY = %s
         """, (floorplan_id, planogram_id))
         conn.commit()
+
+        return jsonify({"success": True}), 200
+
     except Exception as e:
-        raise e
+        return jsonify({"success": False, "message": str(e)}), 500
+
     finally:
         if conn:
             conn.close()
