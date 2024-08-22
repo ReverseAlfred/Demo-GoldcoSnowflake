@@ -79,54 +79,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         floatingFormContainer.style.display = 'none';
     });
 
-    planogramForm.addEventListener('submit', async (event) => {
+    document.getElementById('planogramForm').addEventListener('submit', async function (event) {
         event.preventDefault();
-    
-        // Validate form
+        
+        const formData = new FormData();
+        const pdfFile = document.getElementById('pdfFile').files[0];
         const planogramName = document.getElementById('planogramName').value.trim();
         const dbStatus = parseInt(document.getElementById('dbStatus').value, 10);
-    
+        
+        // Validate form
         if (!planogramName || isNaN(dbStatus)) {
             showMessage('error', 'All fields are required.');
             return;
         }
     
-        // Prepare the data
-        const data = {
-            planogramName: planogramName,
-            dbStatus: dbStatus
-        };
+        // Add planogram name and dbStatus to FormData
+        formData.append('planogramName', planogramName);
+        formData.append('dbStatus', dbStatus);
+        
+        // Add PDF file to FormData if it exists
+        if (pdfFile) {
+            formData.append('pdfFile', pdfFile);
+        }
     
-        // Determine URL based on whether we are editing or adding a new record
-        const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
-    
+        // Insert or update Planogram
+        const url = currentItemId ? '/dsplanogram/update_planogram' : '/dsplanogram/add';
         if (currentItemId) {
-            data.dbKey = currentItemId;  // Include the planogram ID when updating
+            formData.append('dbKey', currentItemId);  // Include the planogram ID when updating
         }
     
         try {
-            const response = await fetch(url, {
+            const planogramResponse = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+                body: formData,  // Use FormData instead of JSON
             });
     
-            const result = await response.json();
-    
-            if (response.ok) {
+            const planogramResult = await planogramResponse.json();
+            if (planogramResult.success) {
                 showMessage('success', currentItemId ? 'Planogram updated successfully.' : 'Planogram added successfully.');
                 floatingFormContainer.style.display = 'none';
                 await fetchItems();  // Refresh the items list
             } else {
-                showMessage('error', result.message || 'Failed to save planogram.');
+                console.error('Error adding planogram:', planogramResult.message);
             }
         } catch (error) {
-            console.error('Error saving planogram:', error);
-            showMessage('error', 'An error occurred while saving the planogram.');
+            console.error('Error:', error);
         }
-    });
+    });    
 
     // Handling edit button click
     itemsContainer.addEventListener('click', (event) => {

@@ -51,6 +51,7 @@ def fetch_planogram_by_id(user, password, planogram_id):
         if conn:
             conn.close()
 
+# Insert a new planogram record and return the ID
 # Insert a new planogram record
 def insert_planogram(user, password, planogramname, dbstatus):
     conn = None
@@ -61,6 +62,29 @@ def insert_planogram(user, password, planogramname, dbstatus):
             INSERT INTO NEWCKB.PUBLIC.IX_SPC_PLANOGRAM (PLANOGRAMNAME, DBSTATUS)
             VALUES (%s, %s)
         """, (planogramname, dbstatus))
+        conn.commit()
+
+        # Now fetch the last inserted planogram ID
+        cursor.execute("SELECT MAX(DBKEY) FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM")
+        planogram_id = cursor.fetchone()[0]
+        return planogram_id
+
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# New function to insert a planogram PDF record
+def insert_planogram_pdf(user, password, planogram_id, pdf_binary):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF (DBPlanogramParentKey, PDF)
+            VALUES (%s, %s)
+        """, (planogram_id, pdf_binary))
         conn.commit()
     except Exception as e:
         raise e
@@ -155,15 +179,23 @@ def add_planogram():
     if not user or not password:
         return jsonify({"success": False, "message": "Missing credentials"}), 401
 
-    data = request.get_json()
-    planogramname = data.get('planogramName')
-    dbstatus = data.get('dbStatus', 1)  # Default to 1 if not provided
+    planogramname = request.form.get('planogramName')
+    dbstatus = request.form.get('dbStatus', 1)  # Default to 1 if not provided
+    pdf_file = request.files.get('pdfFile')
 
-    if not (planogramname and dbstatus is not None):
-        return jsonify({"success": False, "message": "All fields are required"}), 400
+    if not (planogramname and pdf_file):
+        return jsonify({"success": False, "message": "Planogram name and PDF file are required"}), 400
+
+    # Read the binary content of the PDF file
+    pdf_binary = pdf_file.read()
 
     try:
-        insert_planogram(user, password, planogramname, dbstatus)
+        # Insert the planogram and get the ID
+        planogram_id = insert_planogram(user, password, planogramname, dbstatus)
+
+        # Now insert the PDF into the IX_SPC_PLANOGRAM_PDF table
+        insert_planogram_pdf(user, password, planogram_id, pdf_binary)
+
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
