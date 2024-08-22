@@ -81,28 +81,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     planogramForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        
-        // Validate form
-        if (!planogramForm.checkValidity()) {
-            showMessage('error', 'Please fill in all required fields.');
-            return;
-        }
     
-        const formData = new FormData(planogramForm);
-        const data = {
-            planogramName: formData.get('planogramName') || '',  // Ensure non-null value
-            dbStatus: parseInt(formData.get('dbStatus')) || 0  // Ensure integer value
-        };
-        
-        // Debugging - log data before sending
-        console.log('Data being sent:', data);
-        
-        if (!data.planogramName || isNaN(data.dbStatus)) {
+        // Validate form
+        const planogramName = document.getElementById('planogramName').value.trim();
+        const dbStatus = parseInt(document.getElementById('dbStatus').value, 10);
+    
+        if (!planogramName || isNaN(dbStatus)) {
             showMessage('error', 'All fields are required.');
             return;
         }
-        
+    
+        // Prepare the data
+        const data = {
+            planogramName: planogramName,
+            dbStatus: dbStatus
+        };
+    
+        // Determine URL based on whether we are editing or adding a new record
         const url = currentItemId ? `/dsplanogram/update_planogram` : '/dsplanogram/add';
+    
+        if (currentItemId) {
+            data.dbKey = currentItemId;  // Include the planogram ID when updating
+        }
     
         try {
             const response = await fetch(url, {
@@ -126,17 +126,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error saving planogram:', error);
             showMessage('error', 'An error occurred while saving the planogram.');
         }
-    });    
+    });
 
-    // Handle edit and delete button clicks
+    // Handling edit button click
     itemsContainer.addEventListener('click', (event) => {
         if (event.target.classList.contains('edit-button')) {
             currentItemId = event.target.getAttribute('data-id');
             document.getElementById('formTitle').textContent = 'Edit Planogram';
             const item = event.target.closest('.item');
             const fields = item.querySelectorAll('td');
-            document.getElementById('planogramName').value = fields[1].textContent;
-            document.getElementById('dbStatus').value = fields[2].textContent;
+            document.getElementById('planogramName').value = fields[1].textContent.trim();
+            document.getElementById('dbStatus').value = fields[2].textContent.trim();
             floatingFormContainer.style.display = 'flex';
         }
 

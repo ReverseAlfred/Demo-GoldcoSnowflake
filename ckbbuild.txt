@@ -1,0 +1,224 @@
+-- Set role as Sysadmin
+USE ROLE SYSADMIN;
+
+-- Create a new database and warehouse
+CREATE DATABASE IF NOT EXISTS NEWCKB;
+USE DATABASE NEWCKB;
+
+CREATE OR REPLACE WAREHOUSE NEWCKB_WH
+  WITH WAREHOUSE_SIZE = 'XSMALL'
+  AUTO_SUSPEND = 300
+  AUTO_RESUME = TRUE
+  INITIALLY_SUSPENDED = TRUE;
+USE WAREHOUSE NEWCKB_WH;
+
+-- Create tables
+
+-- Products table
+CREATE TABLE IF NOT EXISTS ITX_SPC_PRODUCT (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    UPC VARCHAR(100) UNIQUE,
+    ProductName VARCHAR(255) NOT NULL,
+    Category VARCHAR(255),
+    SubCategory VARCHAR(255),    
+    Dimensions VARCHAR(100),
+    Weight DECIMAL(10, 2),
+    DBStatus INT DEFAULT 1
+);
+
+-- Stores table
+CREATE TABLE IF NOT EXISTS IX_STR_STORE (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    StoreName VARCHAR(255) NOT NULL UNIQUE,
+    DESCRIPTIVO1 VARCHAR(255),
+    DBStatus INT DEFAULT 1
+);
+
+-- FloorPlans table
+CREATE TABLE IF NOT EXISTS IX_FLR_FLOORPLAN (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    FloorplanName TEXT,
+    DBStatus INT DEFAULT 1
+);
+
+-- Planograms table
+CREATE TABLE IF NOT EXISTS IX_SPC_PLANOGRAM (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    PlanogramName VARCHAR(255),
+    PDFPath VARCHAR(255), -- Field for PDF path
+    DBStatus INT DEFAULT 1
+);
+
+-- Positions table
+CREATE TABLE IF NOT EXISTS IX_SPC_POSITION (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBProductParentKey INT NOT NULL,
+    DBPlanogramParentKey INT NOT NULL,
+    DBFixtureParentKey INT NOT NULL,
+    HFacing INT,
+    VFacing INT,
+    DFacing INT,
+    FOREIGN KEY (DBPlanogramParentKey) REFERENCES IX_SPC_PLANOGRAM(DBKEY),
+    FOREIGN KEY (DBProductParentKey) REFERENCES ITX_SPC_PRODUCT(DBKEY)
+);
+
+-- Performance table
+CREATE TABLE IF NOT EXISTS IX_SPC_PERFORMANCE (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBPlanogramParentKey INT NOT NULL,
+    DBProductParentKey INT NOT NULL,
+    FACTINGS INT,
+    CAPACITY INT,
+    UNITMOVEMENT INT,
+    SALES DECIMAL(10, 2),    
+    MARGEN DECIMAL(10, 2),
+    COST DECIMAL(10, 2),
+    FOREIGN KEY (DBPlanogramParentKey) REFERENCES IX_SPC_PLANOGRAM(DBKEY),
+    FOREIGN KEY (DBProductParentKey) REFERENCES ITX_SPC_PRODUCT(DBKEY)
+);
+
+-- Floorplan Performance table
+CREATE TABLE IF NOT EXISTS IX_FLR_PERFORMANCE (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBFloorplanParentKey INT NOT NULL,
+    DBPlanogramParentKey INT NOT NULL,    
+    CAPACITY INT,
+    FOREIGN KEY (DBFloorplanParentKey) REFERENCES IX_FLR_FLOORPLAN(DBKEY),
+    FOREIGN KEY (DBPlanogramParentKey) REFERENCES IX_SPC_PLANOGRAM(DBKEY)
+);
+
+-- Cluster table
+CREATE TABLE IF NOT EXISTS IX_EIA_CLUSTER (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    ClusterName VARCHAR(255) NOT NULL
+);
+
+-- Cluster Store table
+CREATE TABLE IF NOT EXISTS IX_EIA_CLUSTER_STORE (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBClusterParentKey INT NOT NULL,
+    DBStoreParentKey INT NOT NULL,
+    FOREIGN KEY (DBClusterParentKey) REFERENCES IX_EIA_CLUSTER(DBKEY),
+    FOREIGN KEY (DBStoreParentKey) REFERENCES IX_STR_STORE(DBKEY)
+);
+
+-- Store Floorplan table
+CREATE TABLE IF NOT EXISTS IX_STR_STORE_FLOORPLAN (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBStoreParentKey INT NOT NULL,
+    DBFloorplanParentKey INT NOT NULL,
+    FOREIGN KEY (DBStoreParentKey) REFERENCES IX_STR_STORE(DBKEY),
+    FOREIGN KEY (DBFloorplanParentKey) REFERENCES IX_FLR_FLOORPLAN(DBKEY)
+);
+
+-- Planogram PDF table
+CREATE OR REPLACE TABLE IX_SPC_PLANOGRAM_PDF (
+    DBKEY INT AUTOINCREMENT PRIMARY KEY,
+    DBPlanogramParentKey INT,
+    PDF BINARY,
+    FOREIGN KEY (DBPlanogramParentKey) REFERENCES IX_SPC_PLANOGRAM(DBKEY)
+);
+
+-- Insert sample data
+
+-- Products data
+INSERT INTO ITX_SPC_PRODUCT (UPC, ProductName, Category, SubCategory, Dimensions, Weight) VALUES
+('UPC001', 'Product A', 'Category 1', 'SubCategory A', '10x10x10', 1.0),
+('UPC002', 'Product B', 'Category 2', 'SubCategory B', '15x15x15', 1.5),
+('UPC003', 'Product C', 'Category 1', 'SubCategory C', '20x20x20', 2.0),
+('UPC004', 'Product D', 'Category 3', 'SubCategory D', '25x25x25', 2.5),
+('UPC005', 'Product E', 'Category 2', 'SubCategory E', '30x30x30', 3.0);
+
+-- Clusters data
+INSERT INTO IX_EIA_CLUSTER (ClusterName) VALUES
+('Cluster A'),
+('Cluster B'),
+('Cluster C');
+
+-- Stores data
+INSERT INTO IX_STR_STORE (StoreName, DESCRIPTIVO1, DBStatus) VALUES
+('Store 1', 'Description 1', 1),
+('Store 2', 'Description 2', 1),
+('Store 3', 'Description 3', 1),
+('Store 4', 'Description 4', 1),
+('Store 5', 'Description 5', 1);
+
+-- Cluster Store data
+INSERT INTO IX_EIA_CLUSTER_STORE (DBClusterParentKey, DBStoreParentKey)
+SELECT c.DBKEY, s.DBKEY
+FROM IX_EIA_CLUSTER c, IX_STR_STORE s
+WHERE (c.ClusterName, s.StoreName) IN (('Cluster A', 'Store 1'), 
+                                       ('Cluster A', 'Store 2'), 
+                                       ('Cluster B', 'Store 3'), 
+                                       ('Cluster B', 'Store 4'), 
+                                       ('Cluster C', 'Store 5'));
+
+-- Floorplans data
+INSERT INTO IX_FLR_FLOORPLAN (FloorplanName, DBStatus) VALUES
+('Floorplan 1', 1),
+('Floorplan 2', 1),
+('Floorplan 3', 1),
+('Floorplan 4', 1),
+('Floorplan 5', 1);
+
+-- Planograms data
+INSERT INTO IX_SPC_PLANOGRAM (PlanogramName, PDFPath, DBStatus) VALUES
+('Planogram 1', 'stage/path/to/planogram1.pdf', 1),
+('Planogram 2', 'stage/path/to/planogram2.pdf', 1),
+('Planogram 3', 'stage/path/to/planogram3.pdf', 1),
+('Planogram 4', 'stage/path/to/planogram4.pdf', 1),
+('Planogram 5', 'stage/path/to/planogram5.pdf', 1);
+
+-- Positions data
+INSERT INTO IX_SPC_POSITION (DBProductParentKey, DBPlanogramParentKey, DBFixtureParentKey, HFacing, VFacing, DFacing) VALUES
+(1, 1, 1, 2, 1, 1),
+(2, 2, 2, 3, 2, 2),
+(3, 3, 3, 1, 3, 3),
+(4, 4, 4, 4, 4, 4),
+(5, 5, 5, 2, 5, 5);
+
+-- Performance data
+INSERT INTO IX_SPC_PERFORMANCE (DBPlanogramParentKey, DBProductParentKey, FACTINGS, CAPACITY, UNITMOVEMENT, SALES, MARGEN, COST) VALUES
+(1, 1, 100, 50, 10, 1999.00, 500.00, 1499.00),
+(2, 2, 200, 30, 20, 5998.00, 1500.00, 4498.00),
+(3, 3, 150, 40, 15, 2999.00, 750.00, 2249.00),
+(4, 4, 250, 20, 25, 7998.00, 2000.00, 5998.00),
+(5, 5, 300, 10, 30, 9998.00, 2500.00, 7498.00);
+
+-- Floorplan Performance data
+INSERT INTO IX_FLR_PERFORMANCE (DBFloorplanParentKey, DBPlanogramParentKey, CAPACITY) VALUES
+(1, 1, 100),
+(2, 2, 150),
+(3, 3, 200),
+(4, 4, 250),
+(5, 5, 300);
+
+-- Store Floorplan data
+INSERT INTO IX_STR_STORE_FLOORPLAN (DBStoreParentKey, DBFloorplanParentKey) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
+
+-- Create the view PerformanceProdStor
+CREATE OR REPLACE VIEW PERFORMANCEPRODSTOR AS
+SELECT
+    s.StoreName,
+    p.ProductName,
+    SUM(perf.FACTINGS) AS TotalSalesVolume,
+    SUM(perf.SALES) AS TotalSalesRevenue
+FROM
+    IX_SPC_PERFORMANCE perf
+    JOIN IX_SPC_POSITION pos ON perf.DBPlanogramParentKey = pos.DBPlanogramParentKey
+    JOIN ITX_SPC_PRODUCT p ON pos.DBProductParentKey = p.DBKEY
+    JOIN IX_SPC_PLANOGRAM pl ON perf.DBPlanogramParentKey = pl.DBKEY
+    JOIN IX_EIA_CLUSTER_STORE cs ON cs.DBClusterParentKey = pl.DBKEY
+    JOIN IX_STR_STORE s ON cs.DBStoreParentKey = s.DBKEY
+GROUP BY
+    s.StoreName, p.ProductName
+ORDER BY
+    TotalSalesRevenue DESC;
+
+-- Create the stage for PDF files
+CREATE OR REPLACE STAGE PLANOGRAM_PDF_STAGE;

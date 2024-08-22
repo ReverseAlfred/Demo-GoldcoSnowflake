@@ -38,7 +38,6 @@
                     <tr>
                         <th>Planogram ID</th>
                         <th>Planogram Name</th>
-                        <th>PDF Path</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -48,8 +47,7 @@
                     <tr class="item">
                         <td><a href="/plproduct?planogramId={{ planogram[0] }}" class="planogram-link">{{ planogram[0] }}</a></td>
                         <td>{{ planogram[1] }}</td>
-                        <td><a href="{{ planogram[2] }}" target="_blank">{{ planogram[2] }}</a></td>
-                        <td>{{ planogram[3] }}</td>
+                        <td>{{ planogram[2] }}</td>
                         <td>
                             <button class="delete-button custom-style" data-id="{{ planogram[0] }}">Delete</button>
                         </td>
