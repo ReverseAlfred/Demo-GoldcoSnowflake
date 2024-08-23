@@ -26,7 +26,8 @@ def fetch_planograms(user, password):
         cursor.execute("""
             SELECT p.DBKEY, p.PLANOGRAMNAME, p.DBSTATUS, pp.DBKEY AS pdfId
             FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM p
-            LEFT JOIN NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF pp ON p.DBKEY = pp.DBPlanogramParentKey
+            LEFT JOIN NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF pp 
+            ON p.DBKEY = pp.DBPlanogramParentKey
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -269,7 +270,7 @@ def view_pdf(dbkey):
         
         if pdf_data and pdf_data[0]:
             pdf_binary = pdf_data[0]
-            return send_file(io.BytesIO(pdf_binary), attachment_filename='planogram.pdf', as_attachment=True)
+            return send_file(io.BytesIO(pdf_binary), download_name='planogram.pdf', as_attachment=False)
         else:
             return jsonify({"success": False, "message": "PDF not found"}), 404
 
