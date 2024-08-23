@@ -250,7 +250,7 @@ def delete_planogram_route():
 
 # Route to view a PDF file
 @planogram_bp.route('/dsplanogram/view_pdf/<int:dbkey>', methods=['GET'])
-def view_pdf(dbkey):
+def view_pdf_dsplanogram(dbkey):
     user = request.cookies.get('snowflake_username')
     password = request.cookies.get('snowflake_password')
     
@@ -281,6 +281,40 @@ def view_pdf(dbkey):
         if conn:
             conn.close()
 
+# New route to view a PDF file from flplanogram
+@planogram_bp.route('/flplanogram/view_pdf/<int:dbkey>', methods=['GET'])
+def view_pdf_flplanogram(dbkey):
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return jsonify({"success": False, "message": "Missing credentials"}), 401
+
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT PDF
+            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF
+            WHERE DBKEY = %s
+        """, (dbkey,))
+        pdf_data = cursor.fetchone()
+        
+        if pdf_data and pdf_data[0]:
+            pdf_binary = pdf_data[0]
+            return send_file(io.BytesIO(pdf_binary), download_name='planogram.pdf', as_attachment=False)
+        else:
+            return jsonify({"success": False, "message": "PDF not found"}), 404
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
+
+# Route to display the floorplan and associated planograms
 @planogram_bp.route('/flplanogram')
 def flplanogram():
     user = request.cookies.get('snowflake_username')
@@ -294,14 +328,14 @@ def flplanogram():
         return "Error: Floorplan ID is required", 400
     
     try:
-        # Establish Snowflake connection
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
 
-        # Query to get the planograms associated with the given floorplan
         cursor.execute("""
-            SELECT P.DBKEY, P.PLANOGRAMNAME, P.DBSTATUS
+            SELECT P.DBKEY, P.PLANOGRAMNAME, P.DBSTATUS, pp.DBKEY AS pdfId
             FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM P
+            LEFT JOIN NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF pp
+            ON P.DBKEY = pp.DBPlanogramParentKey
             JOIN NEWCKB.PUBLIC.IX_FLR_PERFORMANCE FP
             ON P.DBKEY = FP.DBPLANOGRAMPARENTKEY
             WHERE FP.DBFLOORPLANPARENTKEY = %s
@@ -312,12 +346,14 @@ def flplanogram():
         cursor.execute("SELECT DBKEY, PLANOGRAMNAME, DBSTATUS FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM")
         all_planograms = cursor.fetchall()
 
-        # Render the template with the retrieved data
         return render_template('flplanogram.html', planograms=planograms, all_planograms=all_planograms, floorplan_id=floorplan_id)
 
     except Exception as e:
         return f"Error: {str(e)}", 500
 
+
+
+# Route to add a planogram to a floorplan
 @planogram_bp.route('/flplanogram/add_planogram', methods=['POST'])
 def add_planogram_to_floorplan():
     user = request.cookies.get('snowflake_username')
@@ -353,6 +389,7 @@ def add_planogram_to_floorplan():
         if conn:
             conn.close()
 
+# Route to remove a planogram from a floorplan
 @planogram_bp.route('/flplanogram/remove_planogram', methods=['POST'])
 def remove_planogram_from_floorplan():
     user = request.cookies.get('snowflake_username')

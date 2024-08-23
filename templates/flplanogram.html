@@ -39,6 +39,7 @@
                         <th>Planogram ID</th>
                         <th>Planogram Name</th>
                         <th>Status</th>
+                        <th>PDF</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -48,6 +49,13 @@
                         <td><a href="/plproduct?planogramId={{ planogram[0] }}" class="planogram-link">{{ planogram[0] }}</a></td>
                         <td>{{ planogram[1] }}</td>
                         <td>{{ planogram[2] }}</td>
+                        <td>
+                            {% if planogram[3] %}
+                                <a href="{{ url_for('planogram.view_pdf_flplanogram', dbkey=planogram[3]) }}" target="_blank">View PDF</a>
+                            {% else %}
+                                No PDF Available
+                            {% endif %}
+                        </td>              
                         <td>
                             <button class="delete-button custom-style" data-id="{{ planogram[0] }}">Delete</button>
                         </td>

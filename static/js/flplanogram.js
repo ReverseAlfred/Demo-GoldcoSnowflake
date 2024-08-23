@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch(`/flplanogram?floorplanId=${currentFloorplanId}`);
             const data = await response.text();
+            console.log(data); // Log the raw HTML response for inspection
             const parser = new DOMParser();
             const doc = parser.parseFromString(data, 'text/html');
             const newTbody = doc.querySelector('#itemsContainer tbody').innerHTML;
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error fetching floorplan planogram data:', error);
             showMessage('error', 'Failed to load floorplan planogram data.');
         }
-    }
+    }    
 
     await fetchItems();
 

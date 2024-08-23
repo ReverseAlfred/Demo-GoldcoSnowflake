@@ -50,7 +50,7 @@
                         <td>{{ planogram[2] }}</td>
                         <td>
                             {% if planogram[3] is not none %}
-                                <a href="{{ url_for('planogram.view_pdf', dbkey=planogram[3]) }}" target="_blank">View PDF</a>
+                                <a href="{{ url_for('planogram.view_pdf_dsplanogram', dbkey=planogram[3]) }}" target="_blank">View PDF</a>
                             {% else %}
                                 No PDF available
                             {% endif %}
