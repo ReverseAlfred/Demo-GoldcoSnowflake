@@ -1,5 +1,6 @@
+import io
 import os
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, send_file
 import snowflake.connector
 from config import Config
 
@@ -16,15 +17,16 @@ def get_snowflake_connection(user, password):
         schema=Config.SNOWFLAKE_SCHEMA
     )
 
-# Fetch all planogram records
+# Fetch all planogram records along with associated PDF DBKEY
 def fetch_planograms(user, password):
     conn = None
     try:
         conn = get_snowflake_connection(user, password)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT DBKEY, PLANOGRAMNAME, DBSTATUS
-            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM
+            SELECT p.DBKEY, p.PLANOGRAMNAME, p.DBSTATUS, pp.DBKEY AS pdfId
+            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM p
+            LEFT JOIN NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF pp ON p.DBKEY = pp.DBPlanogramParentKey
         """)
         return cursor.fetchall()
     except Exception as e:
@@ -51,7 +53,6 @@ def fetch_planogram_by_id(user, password, planogram_id):
         if conn:
             conn.close()
 
-# Insert a new planogram record and return the ID
 # Insert a new planogram record
 def insert_planogram(user, password, planogramname, dbstatus):
     conn = None
@@ -245,6 +246,39 @@ def delete_planogram_route():
         return jsonify({"success": False, "message": str(e)}), 500
 
     return jsonify({"success": True}), 200
+
+# Route to view a PDF file
+@planogram_bp.route('/dsplanogram/view_pdf/<int:dbkey>', methods=['GET'])
+def view_pdf(dbkey):
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return jsonify({"success": False, "message": "Missing credentials"}), 401
+
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT PDF
+            FROM NEWCKB.PUBLIC.IX_SPC_PLANOGRAM_PDF
+            WHERE DBKEY = %s
+        """, (dbkey,))
+        pdf_data = cursor.fetchone()
+        
+        if pdf_data and pdf_data[0]:
+            pdf_binary = pdf_data[0]
+            return send_file(io.BytesIO(pdf_binary), attachment_filename='planogram.pdf', as_attachment=True)
+        else:
+            return jsonify({"success": False, "message": "PDF not found"}), 404
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    finally:
+        if conn:
+            conn.close()
 
 @planogram_bp.route('/flplanogram')
 def flplanogram():
