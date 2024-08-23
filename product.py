@@ -44,6 +44,24 @@ def fetch_product_by_upc(user, password, upc):
         if conn:
             conn.close()
 
+# Fetch the DBKEY using UPC
+def fetch_dbkey_by_upc(user, password, upc):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("SELECT DBKEY FROM ITX_SPC_PRODUCT WHERE UPC = %s", (upc,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            raise ValueError("UPC not found")
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
 # Insert a new product
 def insert_product(user, password, upc, product_name, category, subcategory, dimensions, weight, dbstatus):
     conn = None
@@ -55,7 +73,6 @@ def insert_product(user, password, upc, product_name, category, subcategory, dim
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (upc, product_name, category, subcategory, dimensions, weight, dbstatus))
         conn.commit()
-        print(f"Inserted product UPC: {upc}")
     except Exception as e:
         raise e
     finally:
@@ -74,7 +91,6 @@ def update_product(user, password, upc, product_name, category, subcategory, dim
             WHERE UPC = %s
         """, (product_name, category, subcategory, dimensions, weight, dbstatus, upc))
         conn.commit()
-        print(f"Updated product UPC: {upc}")
     except Exception as e:
         raise e
     finally:
@@ -89,7 +105,80 @@ def delete_product(user, password, upc):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM ITX_SPC_PRODUCT WHERE UPC = %s", (upc,))
         conn.commit()
-        print(f"Deleted product UPC: {upc}")
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Fetch products associated with a specific planogram
+def fetch_products_by_planogram(user, password, planogram_id):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT p.UPC, p.PRODUCTNAME, p.CATEGORY, p.SUBCATEGORY, p.DIMENSIONS, p.WEIGHT
+            FROM IX_SPC_POSITION pos
+            JOIN ITX_SPC_PRODUCT p ON pos.DBProductParentKey = p.DBKEY
+            WHERE pos.DBPlanogramParentKey = %s
+        """, (planogram_id,))
+        return cursor.fetchall()
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Fetch all products (to show alongside planogram-specific products)
+def fetch_all_products(user, password):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("SELECT DBKEY, UPC, PRODUCTNAME FROM ITX_SPC_PRODUCT")
+        return cursor.fetchall()
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Insert a product into a planogram
+def insert_product_to_planogram(user, password, planogram_id, product_id):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        # Ensure the product isn't already in the planogram
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM IX_SPC_POSITION
+            WHERE DBPlanogramParentKey = %s AND DBProductParentKey = %s
+        """, (planogram_id, product_id))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("""
+                INSERT INTO IX_SPC_POSITION (DBPlanogramParentKey, DBProductParentKey, DBFixtureParentKey, HFacing, VFacing, DFacing)
+                VALUES (%s, %s, 0, 0, 0, 0)
+            """, (planogram_id, product_id))
+            conn.commit()
+    except Exception as e:
+        raise e
+    finally:
+        if conn:
+            conn.close()
+
+# Delete a product from a planogram
+def delete_product_from_planogram(user, password, planogram_id, product_id):
+    conn = None
+    try:
+        conn = get_snowflake_connection(user, password)
+        cursor = conn.cursor()
+        cursor.execute("""
+            DELETE FROM IX_SPC_POSITION
+            WHERE DBPlanogramParentKey = %s AND DBProductParentKey = %s
+        """, (planogram_id, product_id))
+        conn.commit()
     except Exception as e:
         raise e
     finally:
@@ -219,6 +308,77 @@ def delete_product_route():
 
     try:
         delete_product(user, password, upc)
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    return jsonify({"success": True})
+
+# Route to display products associated with a planogram
+@product_bp.route('/plproduct')
+def plproduct():
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return "Error: Missing credentials", 401
+    
+    planogram_id = request.args.get('planogramId')
+    if not planogram_id:
+        return "Error: Missing planogram ID", 400
+    
+    try:
+        products_in_planogram = fetch_products_by_planogram(user, password, planogram_id)
+        all_products = fetch_all_products(user, password)
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+    return render_template('plproduct.html', products_in_planogram=products_in_planogram, all_products=all_products)
+
+# Route to add a product to a planogram
+@product_bp.route('/plproduct/add_product', methods=['POST'])
+def add_product_to_planogram_route():
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return jsonify({"success": False, "message": "Missing credentials"}), 401
+
+    data = request.get_json()
+    planogram_id = data.get('planogramId')
+    upc = data.get('productId')
+    
+    if not (planogram_id and upc):
+        return jsonify({"success": False, "message": "Planogram ID and Product UPC are required"}), 400
+
+    try:
+        # Fetch the DBKEY using UPC
+        dbkey = fetch_dbkey_by_upc(user, password, upc)
+        insert_product_to_planogram(user, password, planogram_id, dbkey)
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+    return jsonify({"success": True}), 201
+
+# Route to delete a product from a planogram
+@product_bp.route('/plproduct/delete_product', methods=['POST'])
+def delete_product_from_planogram_route():
+    user = request.cookies.get('snowflake_username')
+    password = request.cookies.get('snowflake_password')
+    
+    if not user or not password:
+        return jsonify({"success": False, "message": "Missing credentials"}), 401
+
+    data = request.get_json()
+    planogram_id = data.get('planogramId')
+    upc = data.get('productId')
+
+    if not (planogram_id and upc):
+        return jsonify({"success": False, "message": "Planogram ID and Product UPC are required"}), 400
+
+    try:
+        # Fetch the DBKEY using UPC
+        dbkey = fetch_dbkey_by_upc(user, password, upc)
+        delete_product_from_planogram(user, password, planogram_id, dbkey)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

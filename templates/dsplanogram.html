@@ -45,7 +45,7 @@
                 <tbody>
                     {% for planogram in planograms %}
                     <tr class="item">
-                        <td>{{ planogram[0] }}</td>
+                        <td><a href="/plproduct?planogramId={{ planogram[0] }}" class="planogram-link">{{ planogram[0] }}</a></td>
                         <td>{{ planogram[1] }}</td>
                         <td>{{ planogram[2] }}</td>
                         <td>

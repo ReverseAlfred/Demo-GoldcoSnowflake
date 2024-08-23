@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planogram Product Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plproduct.css') }}">
+</head>
+
+<body>
+    <div class="header">
+        <h1>Planogram Product Management</h1>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <button id="dashboardButton">Dashboard</button>
+            <button id="clusterButton">Cluster</button>
+            <button id="storesButton">Stores</button>
+            <button id="floorPlansButton">FloorPlans</button>
+            <button id="planogramsButton">Planograms</button>
+            <button id="productsButton">Products</button>
+            <button id="performanceButton">Performance</button>
+            <button id="positionsButton">Positions</button>
+        </div>
+
+        <div class="main-content">
+            <div id="floatingMessage" class="floating-message"></div>
+
+            <div class="filter-bar">
+                <input type="text" id="filterInput" placeholder="Search...">
+                <button id="addButton" class="custom-style">Add Product</button>
+            </div>
+            <table id="itemsContainer">
+                <thead>
+                    <tr>
+                        <th>UPC</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Subcategory</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products_in_planogram %}
+                    <tr class="item">
+                        <td>{{ product[0] }}</td>
+                        <td>{{ product[1] }}</td>
+                        <td>{{ product[2] }}</td>
+                        <td>{{ product[3] }}</td>
+                        <td>
+                            <button class="delete-button custom-style" data-id="{{ product[0] }}">Remove</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="floatingFormContainer" class="floating-form-container">
+        <div class="floating-form">
+            <h2 id="formTitle">Add Product to Planogram</h2>
+            <form id="productForm">
+                <label for="productSelect">Select Product</label>
+                <select id="productSelect" name="productId">
+                    {% for product in all_products %}
+                        <option value="{{ product[0] }}">{{ product[2] }} ({{ product[1] }})</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Add</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteConfirmation" class="delete-confirmation">
+        <p>Are you sure you want to remove this product from the planogram?</p>
+        <button id="confirmDelete" class="custom-style">Yes</button>
+        <button id="cancelDelete" class="custom-style">No</button>
+    </div>
+
+    <!-- Ensure the URL parameter is correctly set -->
+    <script src="{{ url_for('static', filename='js/plproduct.js') }}"></script>
+</body>
+
+</html>
