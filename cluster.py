@@ -1,11 +1,10 @@
-import os
-from flask import Blueprint, render_template, request, jsonify
 import snowflake.connector
+from flask import Blueprint, render_template, request, jsonify
 from config import Config
 
 cluster_bp = Blueprint('cluster', __name__)
 
-# Helper function to get Snowflake connection
+# Helper function to establish a Snowflake connection
 def get_snowflake_connection(user, password):
     return snowflake.connector.connect(
         user=user,
@@ -16,85 +15,40 @@ def get_snowflake_connection(user, password):
         schema=Config.SNOWFLAKE_SCHEMA
     )
 
+# Helper function to execute a query and fetch results
+def execute_query(user, password, query, params=None, fetchone=False):
+    with get_snowflake_connection(user, password) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            return cursor.fetchone() if fetchone else cursor.fetchall()
+
 # Fetch all clusters
 def fetch_clusters(user, password):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER")
-        return cursor.fetchall()
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
+    query = "SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER"
+    return execute_query(user, password, query)
 
-# Fetch cluster by ID
+# Fetch a cluster by its ID
 def fetch_cluster_by_id(user, password, cluster_id):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s", (cluster_id,))
-        return cursor.fetchone()
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
+    query = "SELECT DBKEY, CLUSTERNAME FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s"
+    return execute_query(user, password, query, (cluster_id,), fetchone=True)
 
 # Insert a new cluster
 def insert_cluster(user, password, cluster_name):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER (CLUSTERNAME) 
-            VALUES (%s)
-        """, (cluster_name,))
-        conn.commit()
-        print(f"Inserted cluster")
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
+    query = "INSERT INTO NEWCKB.PUBLIC.IX_EIA_CLUSTER (CLUSTERNAME) VALUES (%s)"
+    execute_query(user, password, query, (cluster_name,))
+    # Commit is handled by the context manager
 
 # Update an existing cluster
 def update_cluster(user, password, cluster_id, cluster_name):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE NEWCKB.PUBLIC.IX_EIA_CLUSTER
-            SET CLUSTERNAME = %s
-            WHERE DBKEY = %s
-        """, (cluster_name, cluster_id))
-        conn.commit()
-        print(f"Updated cluster ID: {cluster_id}")
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
+    query = "UPDATE NEWCKB.PUBLIC.IX_EIA_CLUSTER SET CLUSTERNAME = %s WHERE DBKEY = %s"
+    execute_query(user, password, query, (cluster_name, cluster_id))
+    # Commit is handled by the context manager
 
 # Delete a cluster
 def delete_cluster(user, password, cluster_id):
-    conn = None
-    try:
-        conn = get_snowflake_connection(user, password)
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s", (cluster_id,))
-        conn.commit()
-        print(f"Deleted cluster ID: {cluster_id}")
-    except Exception as e:
-        raise e
-    finally:
-        if conn:
-            conn.close()
+    query = "DELETE FROM NEWCKB.PUBLIC.IX_EIA_CLUSTER WHERE DBKEY = %s"
+    execute_query(user, password, query, (cluster_id,))
+    # Commit is handled by the context manager
 
 # Route to display all clusters
 @cluster_bp.route('/dscluster')
@@ -107,10 +61,9 @@ def dscluster():
     
     try:
         clusters = fetch_clusters(user, password)
+        return render_template('dscluster.html', clusters=clusters)
     except Exception as e:
-        return f"Error: {str(e)}", 500
-
-    return render_template('dscluster.html', clusters=clusters)
+        return jsonify({"success": False, "message": str(e)}), 500
 
 # Route to get a cluster by ID
 @cluster_bp.route('/get_cluster', methods=['GET'])
@@ -127,19 +80,18 @@ def get_cluster():
 
     try:
         cluster = fetch_cluster_by_id(user, password, cluster_id)
+        if cluster:
+            return jsonify({
+                "success": True,
+                "cluster": {
+                    "dbkey": cluster[0],
+                    "clusterName": cluster[1]
+                }
+            })
+        else:
+            return jsonify({"success": False, "message": "Cluster not found"}), 404
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-    if cluster:
-        return jsonify({
-            "success": True,
-            "cluster": {
-                "dbkey": cluster[0],
-                "clusterName": cluster[1]
-            }
-        })
-    else:
-        return jsonify({"success": False, "message": "Cluster not found"}), 404
 
 # Route to add a new cluster
 @cluster_bp.route('/dscluster/add', methods=['POST'])
@@ -158,10 +110,9 @@ def add_cluster():
 
     try:
         insert_cluster(user, password, cluster_name)
+        return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-    return jsonify({"success": True}), 200
 
 # Route to update an existing cluster
 @cluster_bp.route('/dscluster/update_cluster', methods=['POST'])
@@ -181,10 +132,9 @@ def update_cluster_route():
 
     try:
         update_cluster(user, password, cluster_id, cluster_name)
+        return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-    return jsonify({"success": True}), 200
 
 # Route to delete a cluster
 @cluster_bp.route('/dscluster/delete_cluster', methods=['POST'])
@@ -203,7 +153,6 @@ def delete_cluster_route():
 
     try:
         delete_cluster(user, password, cluster_id)
+        return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-    return jsonify({"success": True}), 200
